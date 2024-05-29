@@ -1,9 +1,11 @@
 name: Deploy Therapy Dog Connect to S3
 
 on:
+  pull_request:
+    branches: -main
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - main # Trigger on push to the main branch
 
 jobs:
   deploy:
@@ -16,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '21'  # Use the Node.js version compatible with your project
+          node-version: "21" # Use the Node.js version compatible with your project
 
       - name: Install dependencies
         run: npm ci
