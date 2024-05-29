@@ -32,4 +32,4 @@ jobs:
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         run: |
           npm install -g aws-cli
-          aws s3 sync build/ s3://$AWS_BUCKET_NAME --delete
+          aws s3 sync build/ s3://${{AWS_BUCKET_NAME}} --delete
