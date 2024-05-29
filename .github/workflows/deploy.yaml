@@ -1,8 +1,6 @@
 name: Deploy Therapy Dog Connect to S3
 
 on:
-  pull_request:
-    branches: -main
   push:
     branches:
       - main # Trigger on push to the main branch
