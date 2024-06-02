@@ -1,5 +1,5 @@
 import React from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
@@ -21,7 +21,7 @@ const Index = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          alignItems: 'flex-start', // Adjusted to align left
+          alignItems: 'flex-start',
           padding: isSmallScreen ? '40px' : '60px',
         }}
       >
@@ -44,13 +44,14 @@ const Index = () => {
         xs={12}
         md={6}
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start', // Adjusted to align top
-          paddingRight: isSmallScreen ? '0px' : '20px',
-          overflow: 'hidden', // Ensure image doesn't overflow
-          position: 'relative', // Required for absolute positioning
+          position: 'relative',
+          overflow: 'hidden',
           minHeight: 700,
+          paddingRight: isSmallScreen ? '0px' : '20px',
+          paddingLeft: isSmallScreen ? '0px' : '20px',
+          width: isSmallScreen ? '100vw' : 'auto', // Full width on mobile, auto on desktop
+          left: isSmallScreen ? '50%' : '0', // Center on mobile, left aligned on desktop
+          transform: isSmallScreen ? 'translateX(-50%)' : 'none', // Center on mobile
         }}
       >
         <img
@@ -58,11 +59,8 @@ const Index = () => {
           alt={'person petting golden retriever'}
           loading="lazy"
           style={{
-            position: 'absolute',
-            top: 7,
-            right: 0,
-            width: 'calc(100% - 40px)', // Adjusted width to leave 20px padding on right
-            maxHeight: '100vh', // Adjusted max height to fit within viewport height
+            width: '100%',
+            height: '100%',
             objectFit: 'cover',
           }}
         />
