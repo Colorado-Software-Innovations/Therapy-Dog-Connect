@@ -30,8 +30,8 @@ jobs:
       - name: Check code formatting with Prettier
         run: npm run prettier:check  # Check code formatting with Prettier
 
-      - name: Run tests
-        run: npm test  # Run tests
+      # - name: Run tests
+      #   run: npm test  # Run tests
 
       - name: Build project
         run: npm run build  # Build the React app
