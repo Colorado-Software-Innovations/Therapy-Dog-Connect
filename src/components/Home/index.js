@@ -1,5 +1,5 @@
 import React from 'react';
-import Grid from '@mui/material/Unstable_Grid2'; 
+import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
@@ -50,7 +50,7 @@ const Index = () => {
           paddingRight: isSmallScreen ? '0px' : '20px',
           overflow: 'hidden', // Ensure image doesn't overflow
           position: 'relative', // Required for absolute positioning
-          minHeight: 700
+          minHeight: 700,
         }}
       >
         <img

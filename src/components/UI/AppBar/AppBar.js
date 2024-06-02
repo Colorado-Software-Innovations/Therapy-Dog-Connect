@@ -166,7 +166,7 @@ const styles = {
     textTransform: 'lowercase',
     borderRadius: 25,
     margin: 5,
-    boxShadow: 'none'
+    boxShadow: 'none',
   },
 };
 
