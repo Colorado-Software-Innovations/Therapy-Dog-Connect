@@ -14,7 +14,7 @@ const theme = createTheme({
       main: COLORS.primary,
     },
     secondary: {
-      main: '#dc004e',
+      main: COLORS.secondary,
     },
     background: {
       default: '#f5f5f5',
