@@ -9,10 +9,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import { COLORS } from '../../../constants/colors';
+import { useNavigate } from 'react-router-dom';
 
 const pages = ['locations', 'volunteers', 'about', 'contact', 'request a demo', 'login'];
 
 function ResponsiveAppBar() {
+  const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
 
   const handleOpenNavMenu = (event) => {
@@ -21,6 +23,11 @@ function ResponsiveAppBar() {
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handlePageClicked = (e) => {
+    navigate(e);
+    handleCloseNavMenu();
   };
 
   return (
@@ -75,7 +82,7 @@ function ResponsiveAppBar() {
             }}
           >
             {pages.map((page) => (
-              <MenuItem key={page} onClick={handleCloseNavMenu}>
+              <MenuItem key={page} onClick={() => handlePageClicked(page)}>
                 <Typography style={styles.button} textAlign="center">
                   {page}
                 </Typography>
@@ -111,7 +118,7 @@ function ResponsiveAppBar() {
                   variant="outlined"
                   style={styles.button}
                   key={page}
-                  onClick={handleCloseNavMenu}
+                  onClick={() => handlePageClicked(page)}
                   sx={{ my: 2, display: 'block' }}
                 >
                   {page}
@@ -124,7 +131,7 @@ function ResponsiveAppBar() {
                   variant="contained"
                   style={styles.containedButton}
                   key={page}
-                  onClick={handleCloseNavMenu}
+                  onClick={() => handlePageClicked(page)}
                   sx={{ my: 2, display: 'block' }}
                 >
                   {page}
@@ -135,7 +142,7 @@ function ResponsiveAppBar() {
               <Button
                 style={styles.button}
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => handlePageClicked(page)}
                 sx={{ my: 2, display: 'block' }}
               >
                 {page}
