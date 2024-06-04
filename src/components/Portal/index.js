@@ -190,7 +190,6 @@ export default function Admin() {
             <ListItemText primary="My Hospital" />
           </ListItemButton>
         </List>
-
       </Drawer>
       <Main open={open}>
         <DrawerHeader />

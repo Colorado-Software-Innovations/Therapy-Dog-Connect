@@ -8,7 +8,6 @@ import ChangePassword from './ChangePassword';
 //import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
 
-
 function Index() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -42,7 +41,6 @@ function Index() {
         const pwdResp = await authCtx.resetUserPassword(email, password);
         console.log(pwdResp);
         setShowChangePassword(false);
-     
       }
     } catch (error) {
       console.error(error);
@@ -59,8 +57,6 @@ function Index() {
     }
   };
 
-
-
   return (
     <Grid container spacing={2}>
       {isMobile ? (
@@ -68,7 +64,6 @@ function Index() {
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
             {showLoginForm && <LoginForm handleLogin={handleLogin} />}
             {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
-           
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
             <Image />
@@ -82,7 +77,6 @@ function Index() {
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
             {showLoginForm && <LoginForm handleLogin={handleLogin} />}
             {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
-           
           </Grid>
         </>
       )}

@@ -154,7 +154,6 @@ function ResponsiveAppBar() {
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* This is to offset the height of the AppBar */}
-
     </>
   );
 }
