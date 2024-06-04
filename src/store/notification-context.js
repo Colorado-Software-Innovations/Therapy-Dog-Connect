@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState } from 'react';
 
 export const NotificationContext = createContext({
   // eslint-disable-next-line no-unused-vars
@@ -8,8 +8,8 @@ export const NotificationContext = createContext({
 
 function NotificationContextProvider({ children }) {
   const [open, setOpen] = useState(false);
-  const [severity, setSeverity] = useState("info");
-  const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState('info');
+  const [message, setMessage] = useState('');
 
   function show(severity, message) {
     setSeverity(severity);
@@ -29,11 +29,7 @@ function NotificationContextProvider({ children }) {
     hide,
   };
 
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }
 
 export default NotificationContextProvider;
