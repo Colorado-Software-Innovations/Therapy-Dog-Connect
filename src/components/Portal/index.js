@@ -3,7 +3,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
+
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -96,7 +96,6 @@ export default function Admin() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
           <IconButton
@@ -192,7 +191,6 @@ export default function Admin() {
         </List>
       </Drawer>
       <Main open={open}>
-        <DrawerHeader />
         <Outlet />
       </Main>
     </Box>

@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AuthContextProvider from './store/auth-context';
+import NotificationContextProvider from './store/notification-context';
 import CssBaseline from '@mui/material/CssBaseline';
 import { COLORS } from './constants/colors';
 
@@ -37,7 +38,9 @@ root.render(
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <App />
+          <NotificationContextProvider>
+            <App />
+          </NotificationContextProvider>
         </BrowserRouter>
       </ThemeProvider>
     </AuthContextProvider>
