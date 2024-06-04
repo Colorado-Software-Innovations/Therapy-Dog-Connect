@@ -10,11 +10,12 @@ import RequestDemo from './components/RequestADemo';
 import Login from './components/Login';
 import AdminHome from './components/Portal';
 import MainAppBar from './components/UI/AppBar/AppBar';
-import config from './amplifyconfiguration.json';
 import { AuthContext } from './store/auth-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
 import Details from './components/Portal/Hospital/details';
+// eslint-disable-next-line
+import config from './amplifyconfiguration.json';
 
 Amplify.configure(config);
 function App() {
