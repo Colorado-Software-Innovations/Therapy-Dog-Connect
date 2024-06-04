@@ -1,64 +1,74 @@
-import React, { useState } from 'react';
-import { Grid, useMediaQuery, useTheme } from '@mui/material';
+/* eslint-disable no-unused-vars */
+import React, { useState, useContext } from 'react';
+import { Button, Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
-import { signIn, confirmSignIn } from 'aws-amplify/auth';
+
 import LoginForm from './Form';
 import ChangePassword from './ChangePassword';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../store/auth-context';
+
 
 function Index() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const navigate = useNavigate();
-  const [confirmPassword, setConfirmPassword] = useState(false);
+  // const navigate = useNavigate();
+  const authCtx = useContext(AuthContext);
+  // eslint-disable-next-line no-unused-vars
+  const [showLoginForm, setShowLoginForm] = useState(true);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [email, setEmail] = useState('');
 
   const handleLogin = async (e, email, password) => {
-    e.preventDefault();
-    await signIn({
-      username: 'zachcervi@gmail.com',
-      password: password.target.value,
-    })
-      .then(({ nextStep }) => {
-        if (nextStep) {
-          setConfirmPassword(true);
-        } else {
-            navigate('/admin');
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    try {
+      setEmail(email);
+      e.preventDefault();
+      //authCtx.logOut();
+      const resp = await authCtx.loginIn(email, password);
+      if (resp && resp.nextStep) {
+        setShowLoginForm(false);
+        setShowChangePassword(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleChangePassword = async (e, email, password) => {
-    e.preventDefault();
-    await confirmSignIn({
-      username: 'zachcervi@gmail.com',
-      password,
-      challengeResponse: 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED',
-    })
-      .then(({ nextStep, isSignedIn }) => {
-        if (nextStep === 'DONE' && isSignedIn) {
-          //set global state for signed in
-          //redirect to portal page
-          navigate('/admin');
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  const handleChangePassword = async (e, password) => {
+    try {
+      e.preventDefault();
+      const resp = await authCtx.confirmLogIn(email, password);
+      if (resp.nextStep.signInStep === 'DONE') {
+        const pwdResp = await authCtx.resetUserPassword(email, password);
+        console.log(pwdResp);
+        setShowChangePassword(false);
+     
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  const handleConfirmationCode = async (e, code) => {
+    try {
+      e.preventDefault();
+      const resp = await authCtx.confirmUserSignUp(email, code);
+      console.log(resp);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
 
   return (
     <Grid container spacing={2}>
       {isMobile ? (
         <>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {!confirmPassword ? (
-              <LoginForm handleLogin={handleLogin} />
-            ) : (
-              <ChangePassword handleChangePassword={handleChangePassword} />
-            )}
+            {showLoginForm && <LoginForm handleLogin={handleLogin} />}
+            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
+           
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
             <Image />
@@ -70,11 +80,9 @@ function Index() {
             <Image />
           </Grid>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {!confirmPassword ? (
-              <LoginForm handleLogin={handleLogin} />
-            ) : (
-              <ChangePassword handleChangePassword={handleChangePassword} />
-            )}
+            {showLoginForm && <LoginForm handleLogin={handleLogin} />}
+            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
+           
           </Grid>
         </>
       )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Amplify } from 'aws-amplify';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home/index';
@@ -11,9 +11,17 @@ import Login from './components/Login';
 import AdminHome from './components/Portal';
 import MainAppBar from './components/UI/AppBar/AppBar';
 import config from './amplifyconfiguration.json';
+import { AuthContext } from './store/auth-context';
+import Hospitals from './components/Portal/Hospital';
+import Chat from './components/Portal/Chat';
+import Details from './components/Portal/Hospital/details';
 
 Amplify.configure(config);
 function App() {
+  const authCtx = useContext(AuthContext);
+  authCtx.setIsAuthenticated(true);
+  console.log('Is User Signed In', authCtx.isSignedIn);
+
   return (
     <div className="App">
       <MainAppBar />
@@ -26,7 +34,11 @@ function App() {
         <Route path="/request a demo" element={<RequestDemo />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path="/admin" element={<AdminHome />} />
+        <Route path="/admin" element={<AdminHome />}>
+          <Route path="hospitals" element={<Hospitals />} />
+          <Route path="chat" element={<Chat />} />
+          <Route path="hospitals/:id" element={<Details />} />
+        </Route>
       </Routes>
     </div>
   );

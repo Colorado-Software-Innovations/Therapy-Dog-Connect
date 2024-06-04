@@ -37,7 +37,7 @@ const LoginForm = ({ handleLogin }) => {
         sx={{ mt: 1 }}
       >
         <TextField
-          onChange={(e) => setEmail(e)}
+          onChange={(e) => setEmail(e.target.value)}
           margin="normal"
           required
           fullWidth
@@ -47,7 +47,7 @@ const LoginForm = ({ handleLogin }) => {
           autoComplete="email"
         />
         <TextField
-          onChange={(e) => setPassword(e)}
+          onChange={(e) => setPassword(e.target.value)}
           margin="normal"
           required
           fullWidth
