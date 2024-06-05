@@ -47,4 +47,5 @@ jobs:
       - name: Build project
         env:
           CI: false # Set CI to false to prevent treating warnings as errors
+          GENERATE_SOURCEMAP: true
         run: npm run build
