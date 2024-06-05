@@ -22,7 +22,6 @@ Amplify.configure(config);
 function App() {
   const authCtx = useContext(AuthContext);
   authCtx.setIsAuthenticated(true);
-  console.log('Is User Signed In', authCtx.isSignedIn);
 
   return (
     <div className="App">

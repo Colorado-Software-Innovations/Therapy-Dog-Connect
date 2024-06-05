@@ -8,7 +8,6 @@ function useVisits() {
       .post(ADD_VISIT, payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to add visit.', err);
         throw err;
       });
   }, []);
@@ -18,7 +17,6 @@ function useVisits() {
       .get(FETCH_VISIT_BY_HOSPITAL_ID.replace(':id', id))
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to fetch visits.', err);
         throw err;
       });
   }, []);

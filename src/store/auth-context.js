@@ -26,7 +26,6 @@ export const AuthContext = createContext({
 function AuthContextProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const SECRET_KEY = 'somerandomkey'; // Replace with a strong secret key
 
   useEffect(() => {
     const checkUserSession = async () => {
@@ -34,12 +33,12 @@ function AuthContextProvider({ children }) {
         const user = await getCurrentUser();
         setCurrentUser(user);
         setIsAuthenticated(true);
-        const decryptedToken = decryptToken(localStorage.getItem('token'));
-        if (decryptedToken) {
-          // Optional: Use the decrypted token if needed
-        }
+        // const decryptedToken = decryptToken(localStorage.getItem('token'));
+        // if (decryptedToken) {
+        //   // Optional: Use the decrypted token if needed
+        // }
       } catch (error) {
-        console.error('Error checking user session:', error);
+        throw new error(error);
       }
     };
 
@@ -51,19 +50,19 @@ function AuthContextProvider({ children }) {
     };
   }, []);
 
-  const encryptToken = (token) => {
-    return CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
-  };
+  // const encryptToken = (token) => {
+  //   return CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
+  // };
 
-  const decryptToken = (encryptedToken) => {
-    try {
-      const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
-      return bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
-      console.error('Error decrypting token:', error);
-      return null;
-    }
-  };
+  // const decryptToken = (encryptedToken) => {
+  //   try {
+  //     const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
+  //     return bytes.toString(CryptoJS.enc.Utf8);
+  //   } catch (error) {
+  //     console.error('Error decrypting token:', error);
+  //     return null;
+  //   }
+  // };
 
   const confirmLogIn = async (username, password) => {
     return await confirmSignIn({
@@ -86,7 +85,6 @@ function AuthContextProvider({ children }) {
       const status = await signIn({ username, password });
       const { isSignedIn, nextStep } = status;
       if (isSignedIn) {
-        console.log('signed in user...');
         // setCurrentUser(user);
         // setIsAuthenticated(true);
         // localStorage.setItem('token', encryptToken(user.signInUserSession.accessToken.jwtToken));
@@ -94,7 +92,7 @@ function AuthContextProvider({ children }) {
         return status;
       }
     } catch (error) {
-      console.error('Error signing in:', error);
+      throw new error(error);
     }
   };
 
@@ -105,7 +103,7 @@ function AuthContextProvider({ children }) {
       setIsAuthenticated(false);
       //localStorage.removeItem('token');
     } catch (error) {
-      console.error('Error signing out:', error);
+      throw new error(error);
     }
   };
 

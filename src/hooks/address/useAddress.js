@@ -13,7 +13,6 @@ function useAddress() {
       .get(FETCH_ADDRESS_BY_ID.replace(':id', id))
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch address', err);
         throw err;
       });
   }, []);
@@ -23,7 +22,6 @@ function useAddress() {
       .post(ADD_ADDRESS, payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to add address.', err);
         throw err;
       });
   }, []);
@@ -33,7 +31,6 @@ function useAddress() {
       .delete(DELETE_ADDRESS.replace(':id', id))
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to delete address.', err);
         throw err;
       });
   }, []);
@@ -43,7 +40,6 @@ function useAddress() {
       .put(UPDATE_ADDRESS.replace(':id', id), payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to update Address', err);
         throw err;
       });
   }, []);

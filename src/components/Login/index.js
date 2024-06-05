@@ -29,7 +29,7 @@ function Index() {
         setShowChangePassword(true);
       }
     } catch (error) {
-      console.error(error);
+      throw new error(error);
     }
   };
 
@@ -39,11 +39,10 @@ function Index() {
       const resp = await authCtx.confirmLogIn(email, password);
       if (resp.nextStep.signInStep === 'DONE') {
         const pwdResp = await authCtx.resetUserPassword(email, password);
-        console.log(pwdResp);
         setShowChangePassword(false);
       }
     } catch (error) {
-      console.error(error);
+      throw new error(error);
     }
   };
 
@@ -51,9 +50,8 @@ function Index() {
     try {
       e.preventDefault();
       const resp = await authCtx.confirmUserSignUp(email, code);
-      console.log(resp);
     } catch (error) {
-      console.error(error);
+      throw new error(error);
     }
   };
 

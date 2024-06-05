@@ -8,7 +8,6 @@ function usePerson() {
       .post(ADD_PERSON, payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to create person.', err);
         throw err;
       });
   }, []);
@@ -18,7 +17,6 @@ function usePerson() {
       .delete(DELETE_PERSON.replace(':id', id))
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to delete person.', err);
         throw err;
       });
   }, []);
@@ -28,7 +26,6 @@ function usePerson() {
       .put(UPDATE_PERSON.replace(':id', id), payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to update person.', err);
         throw err;
       });
   }, []);

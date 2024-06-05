@@ -14,7 +14,6 @@ function useVenues() {
       .get(FETCH_ALL_VENUES)
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch venues.', err);
         throw err;
       });
   }, []);
@@ -23,7 +22,6 @@ function useVenues() {
       .get(FETCH_VENUE_BY_ID.replace(':id', id))
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch venue.', err);
         throw err;
       });
   }, []);
@@ -33,7 +31,6 @@ function useVenues() {
       .put(UPDATE_VENUE.replace(':id', id), payload)
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch venue.', err);
         throw err;
       });
   }, []);
@@ -43,7 +40,6 @@ function useVenues() {
       .delete(DELETE_ADDRESS.replace(':id', id))
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch venue.', err);
         throw err;
       });
   }, []);
@@ -53,7 +49,6 @@ function useVenues() {
       .post(ADD_VENUE, payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to create venue.', err);
         throw err;
       });
   }, []);

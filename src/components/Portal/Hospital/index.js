@@ -330,7 +330,6 @@ export default function Hospital() {
                         }
                       })
                       .catch((error) => {
-                        console.error('Could not add address.', error);
                         throw error;
                       });
                   });

@@ -129,13 +129,7 @@ export default function Admin() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem
-                onClick={() => {
-                  console.log('signing out...');
-                }}
-              >
-                Logout
-              </MenuItem>
+              <MenuItem onClick={() => {}}>Logout</MenuItem>
             </Menu>
           </Box>
         </Toolbar>

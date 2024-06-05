@@ -8,7 +8,6 @@ function useRooms() {
       .get(FETCH_ROOM_BY_HOSPITAL_ID.replace(':id', id))
       .then((response) => response.data)
       .catch((err) => {
-        console.error('Failed to fetch room.', err);
         throw err;
       });
   }, []);
@@ -18,7 +17,6 @@ function useRooms() {
       .post(ADD_ROOM, payload)
       .then((response) => response)
       .catch((err) => {
-        console.error('Failed to add room.', err);
         throw err;
       });
   }, []);

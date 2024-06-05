@@ -23,4 +23,3 @@ const config = {
 const configPath = path.join(__dirname, 'src', 'amplifyconfiguration.json');
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
-console.log('amplifyconfiguration.json created successfully.');
