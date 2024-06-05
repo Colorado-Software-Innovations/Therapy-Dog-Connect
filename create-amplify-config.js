@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
-
+console.log('prcoess.env', process.env);
 const config = {
   aws_project_region: process.env.AWS_REGION,
   aws_cognito_identity_pool_id: process.env.AWS_COGNITO_IDENTITY_POOL_ID,
