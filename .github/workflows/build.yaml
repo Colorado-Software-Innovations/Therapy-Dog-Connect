@@ -3,43 +3,41 @@ name: Build Therapy Dog Connect
 on:
   push:
     branches:
-      - main  # Triggers the workflow on push to the main branch
+      - main # Triggers the workflow on push to the main branch
   pull_request:
     branches:
-      - main  # Triggers the workflow on pull requests targeting the main branch
+      - main # Triggers the workflow on pull requests targeting the main branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+    runs-on: ubuntu-latest # Use the latest Ubuntu environment
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Check out the repository code
+        uses: actions/checkout@v3 # Check out the repository code
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Set up Node.js environment
+        uses: actions/setup-node@v3 # Set up Node.js environment
         with:
-          node-version: '16'  # Specify the Node.js version to use
+          node-version: '16' # Specify the Node.js version to use
 
       - name: Install dependencies
-        run: npm ci  # Install dependencies using npm
+        run: npm ci # Install dependencies using npm
 
       - name: Run ESLint
-        run: npm run lint  # Run ESLint
+        run: npm run lint # Run ESLint
 
       - name: Check code formatting with Prettier
-        run: npm run prettier:check  # Check code formatting with Prettier
-      
+        run: npm run prettier:check # Check code formatting with Prettier
+
       - name: Create amplifyconfiguration.json
-      env:
-        AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
-        AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
-        AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
-        AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
-        AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
-      run: node create-amplify-config.js
-      # - name: Run tests
-      #   run: npm test  # Run tests
+        env:
+          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
+          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
+          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
+          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
+          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
+        run: node create-amplify-config.js
 
       - name: Build project
-        run: npm run build  # Build the React app
+        run: npm run build # Build the React app
