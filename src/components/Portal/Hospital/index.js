@@ -3,8 +3,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Promise } from 'bluebird';
 import { DataGrid } from '@mui/x-data-grid';
 import { AuthContext } from '../../../store/auth-context';
-// import { HospitalContext } from '../../store/hospital-context';
-// import { NotificationContext } from '../../store/notification-context';
+import { HospitalContext } from '../../../store/hospital-context';
+import { NotificationContext } from '../../../store/notification-context';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -27,9 +27,9 @@ import isEmpty from 'lodash/isEmpty';
 import LoadingButton from '@mui/lab/LoadingButton';
 import LoadingOverlay from '../../UI/LoadingOverlay';
 import Breadcrumb from '../../UI/BreadCrumb';
-// import useAddress from '../../hooks/address/useAddress';
-// import useVenues from '../../hooks/venues/useVenues';
-// import usePerson from '../../hooks/person/usePerson';
+import useAddress from '../../../hooks/address/useAddress';
+import useVenues from '../../../hooks/venues/useVenues';
+import usePerson from '../../../hooks/person/usePerson';
 
 const columns = [
   { field: 'id', headerName: 'Id', width: 70 },
@@ -82,27 +82,27 @@ export default function Hospital() {
   });
   const navigate = useNavigate();
   // const authCtx = useContext(AuthContext);
-  // const hospitalCtx = useContext(HospitalContext);
-  // const notificationCtx = useContext(NotificationContext);
-  // const { addAddress } = useAddress();
-  // const { fetchAllVenues, addVenue } = useVenues();
-  // const { addPerson } = usePerson();
+  const hospitalCtx = useContext(HospitalContext);
+  const notificationCtx = useContext(NotificationContext);
+  const { addAddress } = useAddress();
+  const { fetchAllVenues, addVenue } = useVenues();
+  const { addPerson } = usePerson();
 
-  // useEffect(() => {
-  //   Promise.try(() => {
-  //     fetchAllVenues()
-  //       .then((response) => {
-  //         setHospitalState((prevState) => ({
-  //           ...prevState,
-  //           isLoading: false,
-  //           data: response,
-  //         }));
-  //       })
-  //       .catch((error) => {
-  //         notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
-  //       });
-  //   });
-  // }, [fetchAllVenues, notificationCtx]);
+  useEffect(() => {
+    Promise.try(() => {
+      fetchAllVenues()
+        .then((response) => {
+          setHospitalState((prevState) => ({
+            ...prevState,
+            isLoading: false,
+            data: response,
+          }));
+        })
+        .catch((error) => {
+          notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
+        });
+    });
+  }, [fetchAllVenues, notificationCtx]);
 
   const rows = hospitalState.data.map((hospital) => {
     return {
@@ -293,58 +293,58 @@ export default function Hospital() {
       role: 'Admin',
     };
 
-    // Promise.try(() => {
-    //   addPerson(contactPayload)
-    //     .then((contactResponse) => {
-    //       if (contactResponse.status === 201) {
-    //         const contactId = contactResponse.data.contactId;
-    //         const hospitalPayload = {
-    //           name: newHospitalState.name,
-    //           isActive: false,
-    //           personId: contactId,
-    //         };
+    Promise.try(() => {
+      addPerson(contactPayload)
+        .then((contactResponse) => {
+          if (contactResponse.status === 201) {
+            const contactId = contactResponse.data.contactId;
+            const hospitalPayload = {
+              name: newHospitalState.name,
+              isActive: false,
+              personId: contactId,
+            };
 
-    //         Promise.try(() => {
-    //           addVenue(hospitalPayload).then((hospitalResponse) => {
-    //             if (hospitalResponse.status === 200) {
-    //               const venue_id = hospitalResponse.data.id;
-    //               const addressPayload = {
-    //                 street_1: newHospitalState.address.street_1,
-    //                 street_2: newHospitalState.address.street_2,
-    //                 city: newHospitalState.address.city,
-    //                 state: newHospitalState.address.state,
-    //                 postal_code: newHospitalState.address.postal_code,
-    //                 country: 'USA',
-    //                 venue_id,
-    //               };
+            Promise.try(() => {
+              addVenue(hospitalPayload).then((hospitalResponse) => {
+                if (hospitalResponse.status === 200) {
+                  const venue_id = hospitalResponse.data.id;
+                  const addressPayload = {
+                    street_1: newHospitalState.address.street_1,
+                    street_2: newHospitalState.address.street_2,
+                    city: newHospitalState.address.city,
+                    state: newHospitalState.address.state,
+                    postal_code: newHospitalState.address.postal_code,
+                    country: 'USA',
+                    venue_id,
+                  };
 
-    //               Promise.try(() => {
-    //                 addAddress(addressPayload)
-    //                   .then((addressResponse) => {
-    //                     if (addressResponse.status == 200) {
-    //                       notificationCtx.show(
-    //                         'success',
-    //                         `Hospital: ${hospitalResponse.data.name} created successfully.`,
-    //                       );
-    //                       navigate('/hospitals');
-    //                     }
-    //                   })
-    //                   .catch((error) => {
-    //                     console.error('Could not add address.', error);
-    //                     throw error;
-    //                   });
-    //               });
-    //             }
-    //           });
-    //         }).catch((error) => {
-    //           notificationCtx.show('error', `Oops something went wrong: ${error}`);
-    //         });
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       notificationCtx.show('error', `Oops something went wrong: ${error}`);
-    //     });
-    // });
+                  Promise.try(() => {
+                    addAddress(addressPayload)
+                      .then((addressResponse) => {
+                        if (addressResponse.status == 200) {
+                          notificationCtx.show(
+                            'success',
+                            `Hospital: ${hospitalResponse.data.name} created successfully.`,
+                          );
+                          navigate('/hospitals');
+                        }
+                      })
+                      .catch((error) => {
+                        console.error('Could not add address.', error);
+                        throw error;
+                      });
+                  });
+                }
+              });
+            }).catch((error) => {
+              notificationCtx.show('error', `Oops something went wrong: ${error}`);
+            });
+          }
+        })
+        .catch((error) => {
+          notificationCtx.show('error', `Oops something went wrong: ${error}`);
+        });
+    });
 
     handleClose();
   };

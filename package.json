@@ -14,6 +14,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "aws-amplify": "^6.3.4",
+    "axios": "^1.7.2",
     "bluebird": "^3.7.2",
     "crypto-js": "^4.2.0",
     "react": "^18.3.1",
@@ -23,8 +24,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "create-config": "node create-amplify-config.js",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "npm run create-config && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",

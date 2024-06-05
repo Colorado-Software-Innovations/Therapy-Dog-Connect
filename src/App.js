@@ -11,6 +11,7 @@ import Login from './components/Login';
 import AdminHome from './components/Portal';
 import MainAppBar from './components/UI/AppBar/AppBar';
 import { AuthContext } from './store/auth-context';
+import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
 import Details from './components/Portal/Hospital/details';
@@ -36,9 +37,23 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/admin" element={<AdminHome />}>
-          <Route path="hospitals" element={<Hospitals />} />
+          <Route
+            path="hospitals"
+            element={
+              <HospitalContextProvider>
+                <Hospitals />
+              </HospitalContextProvider>
+            }
+          />
+          <Route
+            path="hospitals/:id"
+            element={
+              <HospitalContextProvider>
+                <Details />
+              </HospitalContextProvider>
+            }
+          />
           <Route path="chat" element={<Chat />} />
-          <Route path="hospitals/:id" element={<Details />} />
         </Route>
       </Routes>
     </div>
