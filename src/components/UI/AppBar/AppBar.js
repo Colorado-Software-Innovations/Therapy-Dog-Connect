@@ -25,97 +25,122 @@ function ResponsiveAppBar() {
     setAnchorElNav(null);
   };
 
-  const handlePageClicked = (e) => {
-    navigate(e);
+  const handlePageClicked = (page) => {
+    navigate(page);
     handleCloseNavMenu();
   };
 
   return (
-    <AppBar position="static" sx={{ padding: 0 }} style={styles.appBar}>
-      <Toolbar disableGutters style={{ marginLeft: 40, marginRight: 40 }}>
-        <Typography
-          variant="h6"
-          noWrap
-          component="a"
-          href="#app-bar-with-responsive-menu"
-          sx={{
-            mr: 2,
-            display: { xs: 'none', md: 'flex' },
-            fontFamily: 'Lora-SemiBold',
-            fontWeight: 700,
-            fontSize: 30,
-            color: 'inherit',
-            textDecoration: 'none',
-          }}
-          style={{ color: COLORS.primary }}
-        >
-          Therapy Dog Connect
-        </Typography>
-
-        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleOpenNavMenu}
-            color="inherit"
-          >
-            <MenuIcon style={{ color: COLORS.primary }} />
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorElNav}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-            open={Boolean(anchorElNav)}
-            onClose={handleCloseNavMenu}
+    <>
+      <AppBar position="fixed" sx={{ padding: 0 }} style={styles.appBar}>
+        <Toolbar disableGutters style={{ marginLeft: 40, marginRight: 40 }}>
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="#"
             sx={{
-              display: { xs: 'block', md: 'none' },
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontFamily: 'Lora-SemiBold',
+              fontWeight: 700,
+              fontSize: 30,
+              color: 'inherit',
+              textDecoration: 'none',
             }}
+            style={{ color: COLORS.primary }}
           >
-            {pages.map((page) => (
-              <MenuItem key={page} onClick={() => handlePageClicked(page)}>
-                <Typography style={styles.button} textAlign="center">
-                  {page}
-                </Typography>
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
+            Therapy Dog Connect
+          </Typography>
 
-        <Typography
-          variant="h5"
-          noWrap
-          component="a"
-          href="#app-bar-with-responsive-menu"
-          sx={{
-            mr: 2,
-            display: { xs: 'flex', md: 'none' },
-            flexGrow: 1,
-            fontWeight: 700,
-            color: 'inherit',
-            textDecoration: 'none',
-          }}
-          style={{ color: COLORS.primary }}
-        >
-          Therapy Dog Connect
-        </Typography>
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon style={{ color: COLORS.primary }} />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: 'block', md: 'none' },
+              }}
+            >
+              {pages.map((page) => (
+                <MenuItem key={page} onClick={() => handlePageClicked(page)}>
+                  <Typography style={styles.button} textAlign="center">
+                    {page}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
 
-        <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          {pages.map((page) => {
-            if (page === 'request a demo') {
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href="#"
+            sx={{
+              mr: 2,
+              display: { xs: 'flex', md: 'none' },
+              flexGrow: 1,
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+            style={{ color: COLORS.primary }}
+          >
+            Therapy Dog Connect
+          </Typography>
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            {pages.map((page) => {
+              if (page === 'request a demo') {
+                return (
+                  <Button
+                    variant="outlined"
+                    style={styles.button}
+                    key={page}
+                    onClick={() => handlePageClicked(page)}
+                    sx={{ my: 2, display: 'block' }}
+                  >
+                    {page}
+                  </Button>
+                );
+              }
+              if (page === 'login') {
+                return (
+                  <Button
+                    variant="contained"
+                    style={styles.containedButton}
+                    key={page}
+                    onClick={() => handlePageClicked(page)}
+                    sx={{ my: 2, display: 'block' }}
+                  >
+                    {page}
+                  </Button>
+                );
+              }
               return (
                 <Button
-                  variant="outlined"
                   style={styles.button}
                   key={page}
                   onClick={() => handlePageClicked(page)}
@@ -124,34 +149,12 @@ function ResponsiveAppBar() {
                   {page}
                 </Button>
               );
-            }
-            if (page === 'login') {
-              return (
-                <Button
-                  variant="contained"
-                  style={styles.containedButton}
-                  key={page}
-                  onClick={() => handlePageClicked(page)}
-                  sx={{ my: 2, display: 'block' }}
-                >
-                  {page}
-                </Button>
-              );
-            }
-            return (
-              <Button
-                style={styles.button}
-                key={page}
-                onClick={() => handlePageClicked(page)}
-                sx={{ my: 2, display: 'block' }}
-              >
-                {page}
-              </Button>
-            );
-          })}
-        </Box>
-      </Toolbar>
-    </AppBar>
+            })}
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <Toolbar /> {/* This is to offset the height of the AppBar */}
+    </>
   );
 }
 

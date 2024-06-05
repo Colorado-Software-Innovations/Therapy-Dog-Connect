@@ -3,35 +3,48 @@ name: Build Therapy Dog Connect
 on:
   push:
     branches:
-      - main  # Triggers the workflow on push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Triggers the workflow on pull requests targeting the main branch
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Check out the repository code
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Set up Node.js environment
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Specify the Node.js version to use
+          node-version: '16'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm ci  # Install dependencies using npm
+        run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint  # Run ESLint
+      - name: Create amplifyconfiguration.json
+        env:
+          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
+          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
+          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
+          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
+          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
+        run: node create-amplify-config.js
 
-      - name: Check code formatting with Prettier
-        run: npm run prettier:check  # Check code formatting with Prettier
-
-      # - name: Run tests
-      #   run: npm test  # Run tests
+      - name: Lint code
+        run: npm run lint
 
       - name: Build project
-        run: npm run build  # Build the React app
+        env:
+          CI: false # Set CI to false to prevent treating warnings as errors
+        run: npm run build

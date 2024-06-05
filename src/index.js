@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import AuthContextProvider from './store/auth-context';
+import NotificationContextProvider from './store/notification-context';
 import CssBaseline from '@mui/material/CssBaseline';
 import { COLORS } from './constants/colors';
 
@@ -14,7 +16,7 @@ const theme = createTheme({
       main: COLORS.primary,
     },
     secondary: {
-      main: '#dc004e',
+      main: COLORS.secondary,
     },
     background: {
       default: '#f5f5f5',
@@ -32,12 +34,16 @@ const theme = createTheme({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <AuthContextProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <NotificationContextProvider>
+            <App />
+          </NotificationContextProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthContextProvider>
   </React.StrictMode>,
 );
 
