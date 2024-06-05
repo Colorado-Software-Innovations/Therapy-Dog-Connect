@@ -24,9 +24,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "create-config": "node create-amplify-config.js",
+    "create-aws-config": "node create-amplify-config.js",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "npm run create-aws-config && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
