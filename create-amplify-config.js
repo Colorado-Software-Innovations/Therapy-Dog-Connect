@@ -2,12 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('AWS_PROJECT_REGION:', process.env.AWS_PROJECT_REGION);
-console.log('AWS_COGNITO_IDENTITY_POOL_ID:', process.env.AWS_COGNITO_IDENTITY_POOL_ID);
-console.log('AWS_COGNITO_REGION:', process.env.AWS_COGNITO_REGION);
-console.log('AWS_USER_POOLS_ID:', process.env.AWS_USER_POOLS_ID);
-console.log('AWS_USER_POOLS_WEB_CLIENT_ID:', process.env.AWS_USER_POOLS_WEB_CLIENT_ID);
-
 const config = {
   aws_project_region: process.env.AWS_PROJECT_REGION,
   aws_cognito_identity_pool_id: process.env.AWS_COGNITO_IDENTITY_POOL_ID,
