@@ -33,6 +33,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
+          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
+          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
+          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
+          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: |
           npm install -g aws-cli
           aws s3 sync build/ s3://therapydogconnect --delete
