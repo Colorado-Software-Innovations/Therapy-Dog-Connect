@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
-console.log('prcoess.env', process.env);
+
 const config = {
   aws_project_region: process.env.AWS_REGION,
   aws_cognito_identity_pool_id: process.env.AWS_COGNITO_IDENTITY_POOL_ID,
@@ -20,6 +20,16 @@ const config = {
   },
   aws_cognito_verification_mechanisms: ['EMAIL'],
 };
-console.log(JSON.stringify(config));
-const configPath = path.join(__dirname, 'src', 'amplifyconfiguration.json');
-fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+// Paths to the files
+const jsonFilePath = path.join(__dirname, 'src', 'amplifyconfiguration.json');
+const jsFilePath = path.join(__dirname, 'src', 'aws-exports.js');
+
+// Write configuration to JSON file
+fs.writeFileSync(jsonFilePath, JSON.stringify(config, null, 2), 'utf-8');
+console.log(`Configuration has been written to ${jsonFilePath}`);
+
+// Write configuration to JS file
+const jsFileContent = `const awsExports = ${JSON.stringify(config, null, 2)};\nexport default awsExports;`;
+fs.writeFileSync(jsFilePath, jsFileContent, 'utf-8');
+console.log(`Configuration has been written to ${jsFilePath}`);
