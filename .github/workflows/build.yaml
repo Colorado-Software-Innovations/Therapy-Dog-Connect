@@ -34,9 +34,9 @@ jobs:
 
       - name: Create amplifyconfiguration.json
         env:
-          AWS_PROJECT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
           AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
-          AWS_COGNITO_REGION: ${{ secrets.AWS_REGION }}
+          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
           AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
           AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: node create-amplify-config.js

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
 
@@ -19,7 +20,6 @@ const config = {
   },
   aws_cognito_verification_mechanisms: ['EMAIL'],
 };
-
+console.log(JSON.stringify(config));
 const configPath = path.join(__dirname, 'src', 'amplifyconfiguration.json');
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-
