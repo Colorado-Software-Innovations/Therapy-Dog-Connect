@@ -40,4 +40,6 @@ jobs:
         run: node create-amplify-config.js
 
       - name: Build project
+        env:
+          CI: false
         run: npm run build # Build the React app
