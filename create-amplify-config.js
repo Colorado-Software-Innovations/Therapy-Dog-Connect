@@ -32,8 +32,10 @@ const jsonFilePath = path.join(__dirname, 'src', 'amplifyconfiguration.json');
 const jsFilePath = path.join(__dirname, 'src', 'aws-exports.js');
 
 // Write configuration to JSON file
-fs.writeFileSync(jsonFilePath, JSON.stringify(config, null, 2), 'utf-8');
+fs.writeFileSync(jsonFilePath, JSON.stringify(config));
 console.log(`Configuration has been written to ${jsonFilePath}`);
+
+console.log('JSON ', JSON.stringify(config));
 
 // Write configuration to JS file
 const jsFileContent = `const awsExports = ${JSON.stringify(config, null, 2)};\nexport default awsExports;`;
