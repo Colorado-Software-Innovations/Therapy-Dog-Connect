@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect } from 'react';
 import * as CryptoJS from 'crypto-js';
@@ -38,7 +39,7 @@ function AuthContextProvider({ children }) {
         //   // Optional: Use the decrypted token if needed
         // }
       } catch (error) {
-        throw new error(error);
+        console.error(error);
       }
     };
 
@@ -92,7 +93,7 @@ function AuthContextProvider({ children }) {
         return status;
       }
     } catch (error) {
-      throw new error(error);
+      console.error(error);
     }
   };
 
@@ -103,7 +104,7 @@ function AuthContextProvider({ children }) {
       setIsAuthenticated(false);
       //localStorage.removeItem('token');
     } catch (error) {
-      throw new error(error);
+      console.error(error);
     }
   };
 

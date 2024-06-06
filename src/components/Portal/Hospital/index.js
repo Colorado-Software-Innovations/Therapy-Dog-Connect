@@ -102,7 +102,7 @@ export default function Hospital() {
     //       notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
     //     });
     // });
-    setHospitalState({data:hospitals})
+    setHospitalState({ data: hospitals });
   }, [fetchAllVenues, notificationCtx]);
 
   const rows = hospitalState.data.map((hospital) => {
