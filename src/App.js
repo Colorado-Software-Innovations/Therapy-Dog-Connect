@@ -14,7 +14,7 @@ import { AuthContext } from './store/auth-context';
 import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
-import Details from './components/Portal/Hospital/Details';
+import Details from './components/Portal/Hospital/Detail';
 // eslint-disable-next-line
 import config from './amplifyconfiguration.json';
 import SnackbarAlert from './components/UI/SnackBarAlert';
