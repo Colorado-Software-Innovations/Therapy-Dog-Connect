@@ -27,7 +27,7 @@ import usePerson from '../../../hooks/person/usePerson';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
 import UsersTable from '../Users/Table';
 
-const HospitalDetail = () => {
+const Details = () => {
   const [hospital, setHospital] = useState();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -298,4 +298,4 @@ const HospitalDetail = () => {
   );
 };
 
-export default HospitalDetail;
+export default Details;
