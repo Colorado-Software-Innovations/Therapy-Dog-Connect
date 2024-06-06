@@ -8,11 +8,13 @@ const QrCode = ({ qrInput, message, hospitalName }) => {
     try {
       return await QRCode.toCanvas(document.getElementById('canvas'), qrInput);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   };
   useEffect(() => {
     generateQR();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const downloadQR = () => {
