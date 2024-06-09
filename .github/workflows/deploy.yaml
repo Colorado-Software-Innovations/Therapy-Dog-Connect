@@ -49,4 +49,4 @@ jobs:
           AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: |
           npm install -g aws-cli
-          aws s3 sync build/ s3://therapydogconnect --delete
+          aws s3 sync build/ s3://therapydogconnect.com --delete
