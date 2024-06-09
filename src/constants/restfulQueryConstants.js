@@ -1,9 +1,8 @@
-const ADDRESS_SERVICE = 'https://3lydvrh6f2.execute-api.us-east-1.amazonaws.com/dev';
 const BASE_URL = `http://localhost:8080/api`;
 /**
  * Address Service
  */
-export const FETCH_ADDRESS_BY_ID = `${ADDRESS_SERVICE}/address/:id`;
+export const FETCH_ADDRESS_BY_ID = `${BASE_URL}/address/:id`;
 export const ADD_ADDRESS = `${BASE_URL}/address`;
 export const DELETE_ADDRESS = `${BASE_URL}/address/:id`;
 export const UPDATE_ADDRESS = `${BASE_URL}/address/:id`;

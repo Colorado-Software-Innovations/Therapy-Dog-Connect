@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import isEmpty from 'lodash/isEmpty';
 import { useParams } from 'react-router-dom';
-import { AuthContext } from '../../../store/auth-context';
+
 import { NotificationContext } from '../../../store/notification-context';
 import useRooms from '../../../hooks/rooms/useRooms';
 export default function RoomTable({ hospitalId }) {
@@ -16,7 +16,7 @@ export default function RoomTable({ hospitalId }) {
   const [error, setError] = useState('');
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const authCtx = useContext(AuthContext);
+
   const notificationCtx = useContext(NotificationContext);
   const columns = [
     { field: 'id', headerName: 'Id' },
@@ -147,7 +147,7 @@ export default function RoomTable({ hospitalId }) {
             }}
           />
         </Grid>
-        {authCtx.isInRole('Admin') && <AddRoomButton />}
+        <AddRoomButton />
       </Grid>
     </>
   );

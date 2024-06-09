@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useState, useEffect } from 'react';
 
 import { AuthContext } from '../../../store/auth-context';
@@ -26,9 +27,10 @@ import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/person/usePerson';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
 import UsersTable from '../Users/Table';
+import hospitalDetails from '../../../mockData/hospitalDetails';
 
 const Details = () => {
-  const [hospital, setHospital] = useState();
+  const [hospital, setHospital] = useState(hospitalDetails);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [visitState, setVisitState] = useState({
@@ -100,35 +102,35 @@ const Details = () => {
     }
   };
 
-  useEffect(() => {
-    Promise.try(() => {
-      fetchVenueById(params.id)
-        .then((response) => {
-          setIsLoading(false);
-          setHospital(response);
-        })
-        .catch((error) => {
-          notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
-        });
-    });
-  }, [fetchVenueById, notificationCtx, params.id]);
+  // useEffect(() => {
+  //   Promise.try(() => {
+  //     fetchVenueById(params.id)
+  //       .then((response) => {
+  //         setIsLoading(false);
+  //         setHospital(response);
+  //       })
+  //       .catch((error) => {
+  //         notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
+  //       });
+  //   });
+  // }, [fetchVenueById, notificationCtx, params.id]);
 
-  useEffect(() => {
-    setVisitState((prevState) => ({ ...prevState, isLoading: true }));
-    Promise.try(() => {
-      fetchVisitsByHospitalId(params.id)
-        .then((response) => {
-          setVisitState((prevState) => ({
-            ...prevState,
-            isLoading: false,
-            data: response.data,
-          }));
-        })
-        .catch((err) => {
-          notificationCtx.show('error', `Oops something went wrong: ${err}`);
-        });
-    });
-  }, [fetchVisitsByHospitalId, notificationCtx, params.id]);
+  // useEffect(() => {
+  //   setVisitState((prevState) => ({ ...prevState, isLoading: true }));
+  //   Promise.try(() => {
+  //     fetchVisitsByHospitalId(params.id)
+  //       .then((response) => {
+  //         setVisitState((prevState) => ({
+  //           ...prevState,
+  //           isLoading: false,
+  //           data: response.data,
+  //         }));
+  //       })
+  //       .catch((err) => {
+  //         notificationCtx.show('error', `Oops something went wrong: ${err}`);
+  //       });
+  //   });
+  // }, [fetchVisitsByHospitalId, notificationCtx, params.id]);
 
   const handleCancelClick = () => {
     setIsEditing(false);
@@ -174,7 +176,7 @@ const Details = () => {
     <>
       {hospital && (
         <BreadCrumb
-          middleCrumb={{ link: '/hospitals', text: 'Hospitals' }}
+          middleCrumb={{ link: '/admin/hospitals', text: 'Hospitals' }}
           lastCrumb={hospital.name}
         />
       )}
@@ -208,14 +210,13 @@ const Details = () => {
                   <Typography style={{ textAlign: 'left' }} variant="h4" component="h2">
                     {hospital.name}
                   </Typography>
-                  {authCtx.isInRole('Admin') && (
-                    <IconButton
-                      style={{ height: 40, marginTop: 0, marginLeft: 5 }}
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <EditIcon style={{ height: 40 }} />
-                    </IconButton>
-                  )}
+
+                  <IconButton
+                    style={{ height: 40, marginTop: 0, marginLeft: 5 }}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <EditIcon style={{ height: 40 }} />
+                  </IconButton>
                 </Stack>
                 <Stack direction="row" style={{ textAlign: 'left', marginTop: 5 }}>
                   <LocationOnIcon style={{ fontSize: 24 }} />
