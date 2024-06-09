@@ -109,12 +109,12 @@ export default function Hospital() {
     return {
       id: hospital.id,
       name: hospital.name,
-      isActive: hospital.is_active,
+      isActive: hospital.isActive,
       street: hospital.Address.street_1,
       city: hospital.Address.city,
       state: hospital.Address.state,
       street2: hospital.Address.street_2,
-      postalCode: hospital.Address.postal_code,
+      postalCode: hospital.Address.postalCode,
       addressId: hospital.Address.id,
     };
   });
