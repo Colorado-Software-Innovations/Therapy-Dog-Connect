@@ -33,7 +33,7 @@ function App() {
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/request a demo" element={<RequestDemo />} />
+        <Route path="/request  demo" element={<RequestDemo />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/admin" element={<AdminHome />}>
