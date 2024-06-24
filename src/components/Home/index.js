@@ -55,7 +55,7 @@ const Index = () => {
         }}
       >
         <img
-          src={'https://therapydogconnect.s3.amazonaws.com/assets/person-petting-dog.jpg'}
+          src={'https://s3.amazonaws.com/therapydogconnect.com/assets/person-petting-dog.jpg'}
           alt={'person petting golden retriever'}
           loading="lazy"
           style={{

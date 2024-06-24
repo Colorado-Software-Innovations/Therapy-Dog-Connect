@@ -1,4 +1,5 @@
-const BASE_URL = `http://localhost:8080/api`;
+// eslint-disable-next-line no-undef
+const BASE_URL = `${process.env.REACT_APP_API_URL}/api`;
 /**
  * Address Service
  */
