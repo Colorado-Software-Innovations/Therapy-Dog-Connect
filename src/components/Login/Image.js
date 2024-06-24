@@ -1,7 +1,7 @@
 import React from 'react';
 const Image = () => (
   <img
-    src={'https://therapydogconnect.s3.amazonaws.com/assets/login-dog.jpg'}
+    src={'https://s3.amazonaws.com/therapydogconnect.com/assets/login-dog.jpg'}
     alt={'Long coated white dog PC: Caleb Woods'}
     loading="lazy"
     style={{
