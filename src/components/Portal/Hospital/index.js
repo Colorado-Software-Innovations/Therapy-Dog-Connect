@@ -30,7 +30,7 @@ import Breadcrumb from '../../UI/BreadCrumb';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/person/usePerson';
-
+import hospitals from '../../../mockData/hospital';
 const columns = [
   { field: 'id', headerName: 'Id', width: 70 },
   { field: 'name', headerName: 'Hospital Name', width: 250 },
@@ -89,31 +89,32 @@ export default function Hospital() {
   const { addPerson } = usePerson();
 
   useEffect(() => {
-    Promise.try(() => {
-      fetchAllVenues()
-        .then((response) => {
-          setHospitalState((prevState) => ({
-            ...prevState,
-            isLoading: false,
-            data: response,
-          }));
-        })
-        .catch((error) => {
-          notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
-        });
-    });
+    // Promise.try(() => {
+    //   fetchAllVenues()
+    //     .then((response) => {
+    //       setHospitalState((prevState) => ({
+    //         ...prevState,
+    //         isLoading: false,
+    //         data: response,
+    //       }));
+    //     })
+    //     .catch((error) => {
+    //       notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
+    //     });
+    // });
+    setHospitalState({ data: hospitals });
   }, [fetchAllVenues, notificationCtx]);
 
   const rows = hospitalState.data.map((hospital) => {
     return {
       id: hospital.id,
       name: hospital.name,
-      isActive: hospital.is_active,
+      isActive: hospital.isActive,
       street: hospital.Address.street_1,
       city: hospital.Address.city,
       state: hospital.Address.state,
       street2: hospital.Address.street_2,
-      postalCode: hospital.Address.postal_code,
+      postalCode: hospital.Address.postalCode,
       addressId: hospital.Address.id,
     };
   });
@@ -121,8 +122,8 @@ export default function Hospital() {
   const handleRowClick = ({ row }) => {
     const selectedHospital = _.first(hospitalState.data.filter((data) => data.id === row.id));
 
-    //hospitalCtx.setSelectedHospital(selectedHospital);
-    //navigate(`/hospitals/${row.id}`);
+    hospitalCtx.setSelectedHospital(selectedHospital);
+    navigate(`${row.id}`);
   };
 
   const resetState = () => {
