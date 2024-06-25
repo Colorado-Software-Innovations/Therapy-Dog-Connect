@@ -1,58 +1,89 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useContext } from 'react';
-import { Button, Grid, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
-
+import { signUp, confirmSignUp } from 'aws-amplify/auth';
 import LoginForm from './Form';
-import ChangePassword from './ChangePassword';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
+import ConfirmCode from './ConfirmCode';
+import SignUpForm from '../SignUp/Form';
 
 function Index() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const authCtx = useContext(AuthContext);
-  // eslint-disable-next-line no-unused-vars
-  const [showLoginForm, setShowLoginForm] = useState(true);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [email, setEmail] = useState('');
+  const [state, setState] = useState({
+    showLoginForm: true,
+    showSignUpForm: false,
+    showConfirmationCode: false,
+    errorMessage: '',
+  });
 
   const handleLogin = async (e, email, password) => {
     try {
-      setEmail(email);
+      setState((prevState) => ({ ...prevState, errorMessage: '' }));
       e.preventDefault();
-      //authCtx.logOut();
-      const resp = await authCtx.loginIn(email, password);
+      const resp = await authCtx.logIn(email, password);
       if (resp && resp.nextStep) {
-        setShowLoginForm(false);
-        setShowChangePassword(true);
+        setState((prevState) => ({ ...prevState, showLoginForm: false }));
       }
-    } catch (error) {
-      throw new error(error);
-    }
-  };
-
-  const handleChangePassword = async (e, password) => {
-    try {
-      e.preventDefault();
-      const resp = await authCtx.confirmLogIn(email, password);
-      if (resp.nextStep.signInStep === 'DONE') {
-        const pwdResp = await authCtx.resetUserPassword(email, password);
-        setShowChangePassword(false);
+      if (resp.isSignedIn) {
+        authCtx.isLoggedIn = resp.isSignedIn;
+        navigate('/admin');
       }
-    } catch (error) {
-      throw new error(error);
+    } catch (err) {
+      setState((prevState) => ({ ...prevState, errorMessage: 'Incorrect username or password.' }));
     }
   };
 
   const handleConfirmationCode = async (e, code) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
-      const resp = await authCtx.confirmUserSignUp(email, code);
-    } catch (error) {
-      throw new error(error);
+      const resp = await confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code });
+      if (resp.isSignUpComplete) {
+        return resp;
+      }
+    } catch (err) {
+      return err;
     }
+  };
+
+  const toggle = () => {
+    setState((prevState) => ({
+      ...prevState,
+      showLoginForm: !prevState.showLoginForm,
+      showSignUpForm: prevState.showLoginForm,
+    }));
+  };
+
+  const handleSignUp = async (e, email, password, phoneNumber) => {
+    authCtx.setSignUpEmail(email);
+    const { isSignUpComplete } = await signUp({
+      username: email,
+      password,
+      options: {
+        userAttributes: {
+          email,
+          phone_number: phoneNumber || '+15555555555', // E.164 number convention
+        },
+      },
+    });
+    if (!isSignUpComplete) {
+      setState((prevState) => ({
+        ...prevState,
+        showSignUpForm: false,
+        showConfirmationCode: true,
+      }));
+    }
+  };
+
+  const handleConfirmComplete = () => {
+    setState((prevState) => ({
+      ...prevState,
+      showConfirmationCode: false,
+      showLoginForm: true,
+    }));
   };
 
   return (
@@ -60,8 +91,16 @@ function Index() {
       {isMobile ? (
         <>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && <LoginForm handleLogin={handleLogin} />}
-            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
+            {state.showLoginForm && (
+              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
+            )}
+            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+            {state.showConfirmationCode && (
+              <ConfirmCode
+                handleConfirmationCode={handleConfirmationCode}
+                confirmComplete={handleConfirmComplete}
+              />
+            )}
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
             <Image />
@@ -73,8 +112,16 @@ function Index() {
             <Image />
           </Grid>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && <LoginForm handleLogin={handleLogin} />}
-            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
+            {state.showLoginForm && (
+              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
+            )}
+            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+            {state.showConfirmationCode && (
+              <ConfirmCode
+                handleConfirmationCode={handleConfirmationCode}
+                confirmComplete={handleConfirmComplete}
+              />
+            )}
           </Grid>
         </>
       )}

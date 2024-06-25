@@ -4,16 +4,45 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import Copyright from '../UI/CopyRight';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Grid from '@mui/material/Grid';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import CopyRight from '../UI/CopyRight';
 
-const LoginForm = ({ handleLogin }) => {
+const LoginForm = ({ handleLogin, toggle, error }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const validateEmail = (email) => {
+    // Basic email regex for validation
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Validate email before submitting
+    if (!validateEmail(email)) {
+      setEmailError('Invalid email format');
+      return;
+    } else {
+      setEmailError('');
+    }
+    handleLogin(e, email, password);
+  };
+
   return (
     <Box
       sx={{
@@ -30,14 +59,16 @@ const LoginForm = ({ handleLogin }) => {
       <Typography component="h1" variant="h5">
         Login
       </Typography>
-      <Box
-        component="form"
-        noValidate
-        onSubmit={(e) => handleLogin(e, email, password)}
-        sx={{ mt: 1 }}
-      >
+      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
         <TextField
           onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => {
+            if (email && !validateEmail(email)) {
+              setEmailError('Invalid email format');
+            } else {
+              setEmailError('');
+            }
+          }}
           margin="normal"
           required
           fullWidth
@@ -45,6 +76,19 @@ const LoginForm = ({ handleLogin }) => {
           label="Email Address"
           name="email"
           autoComplete="email"
+          error={!!emailError}
+          helperText={emailError}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                {emailError && (
+                  <IconButton size="small">
+                    <ErrorOutlineIcon color="error" />
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ),
+          }}
         />
         <TextField
           onChange={(e) => setPassword(e.target.value)}
@@ -53,34 +97,60 @@ const LoginForm = ({ handleLogin }) => {
           fullWidth
           name="password"
           label="Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           id="password"
           autoComplete="current-password"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleTogglePasswordVisibility} edge="end">
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
         />
-        <Button
-          onSubmit={(e) => handleLogin(e, email, password)}
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
+        {error && (
+          <Typography sx={{ mt: 2, color: '#cc0000', textAlign: 'center' }}>{error}</Typography>
+        )}
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Sign In
         </Button>
         <Grid container>
           <Grid item xs>
-            <Link href="#" variant="body2">
-              Forgot password?
-            </Link>
+            <Button style={styles.button}>Forgot Password?</Button>
           </Grid>
         </Grid>
-        <Copyright sx={{ mt: 5 }} />
+        <Grid container>
+          <Grid item xs>
+            <Button style={styles.button} onClick={toggle}>
+              Sign Up
+            </Button>
+          </Grid>
+        </Grid>
+
+        <CopyRight sx={{ mt: 5 }} />
       </Box>
     </Box>
   );
+};
+
+const styles = {
+  button: {
+    margin: 0,
+    fontFamily: 'Noto Sans, Roboto, Arial, sans-serif',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    lineHeight: 1.43,
+    color: '#275C4A',
+    textTransform: 'none',
+    textDecoration: 'underline',
+    textDecorationColor: 'rgba(39, 92, 74, 0.4)',
+  },
 };
 
 export default LoginForm;

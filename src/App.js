@@ -22,7 +22,6 @@ import SnackbarAlert from './components/UI/SnackBarAlert';
 Amplify.configure(config);
 function App() {
   const authCtx = useContext(AuthContext);
-  authCtx.setIsAuthenticated(true);
 
   return (
     <div className="App">
@@ -36,25 +35,27 @@ function App() {
         <Route path="/request  demo" element={<RequestDemo />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path="/admin" element={<AdminHome />}>
-          <Route
-            path="hospitals"
-            element={
-              <HospitalContextProvider>
-                <Hospitals />
-              </HospitalContextProvider>
-            }
-          />
-          <Route
-            path="hospitals/:id"
-            element={
-              <HospitalContextProvider>
-                <Details />
-              </HospitalContextProvider>
-            }
-          />
-          <Route path="chat" element={<Chat />} />
-        </Route>
+        {authCtx.isLoggedIn && (
+          <Route path="/admin" element={<AdminHome />}>
+            <Route
+              path="hospitals"
+              element={
+                <HospitalContextProvider>
+                  <Hospitals />
+                </HospitalContextProvider>
+              }
+            />
+            <Route
+              path="hospitals/:id"
+              element={
+                <HospitalContextProvider>
+                  <Details />
+                </HospitalContextProvider>
+              }
+            />
+            <Route path="chat" element={<Chat />} />
+          </Route>
+        )}
       </Routes>
       <SnackbarAlert />
     </div>

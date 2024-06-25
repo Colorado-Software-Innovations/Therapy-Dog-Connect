@@ -1,14 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import PasswordIcon from '@mui/icons-material/Password';
 import Typography from '@mui/material/Typography';
-import Copyright from '../UI/CopyRight';
+import CopyRight from '../UI/CopyRight';
+import CircularProgress from '@mui/material/CircularProgress';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-const ConfirmCode = ({ handleConfirmationCode }) => {
-  const [confirmCode, setConfirmCode] = useState('');
+const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
+  const [confirmCode, setConfirmCode] = useState(new Array(6).fill(''));
+  const [isLoading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const inputRefs = useRef([]);
+
+  const handleChange = (e, index) => {
+    const value = e.target.value;
+    if (/^[0-9]$/.test(value) || value === '') {
+      const newCode = [...confirmCode];
+      newCode[index] = value;
+      setConfirmCode(newCode);
+
+      if (value !== '' && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    const code = confirmCode.join('');
+    setLoading(true);
+
+    try {
+      const result = await handleConfirmationCode(e, code);
+      if (result.isSignUpComplete) {
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          setConfirmCode(new Array(6).fill(''));
+          confirmComplete();
+        }, 3000);
+      }
+    } catch (error) {
+      setShowErrorMessage(true);
+      setConfirmCode(new Array(6).fill(''));
+      setErrorMessage(`Oops something went wrong. ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isAllFilledAndNotLoading = confirmCode.every((code) => code !== '') && !isLoading;
 
   return (
     <Box
@@ -26,33 +73,55 @@ const ConfirmCode = ({ handleConfirmationCode }) => {
       <Typography component="h1" variant="h5">
         We sent you a code to your email. Please confirm below.
       </Typography>
-      <Box
-        component="form"
-        noValidate
-        onSubmit={(e) => handleConfirmationCode(e, confirmCode)}
-        sx={{ mt: 1 }}
-      >
-        <TextField
-          onChange={(e) => setConfirmCode(e.target.value)}
-          margin="normal"
-          required
-          fullWidth
-          name="code"
-          label="Code"
-          type="number"
-          id="code"
-        />
-
+      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+          {confirmCode.map((_, index) => (
+            <TextField
+              key={index}
+              inputRef={(el) => (inputRefs.current[index] = el)}
+              onChange={(e) => handleChange(e, index)}
+              value={confirmCode[index]}
+              margin="normal"
+              required
+              name={`code-${index}`}
+              label=""
+              type="text"
+              disabled={showSuccessMessage || isLoading}
+              inputProps={{ maxLength: 1, style: { textAlign: 'center' } }}
+              sx={{ width: '3rem' }}
+            />
+          ))}
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          {isLoading && <CircularProgress />}
+        </Box>
         <Button
-          onSubmit={(e) => handleConfirmationCode(e, confirmCode)}
           type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
+          disabled={!isAllFilledAndNotLoading}
         >
-          Confirm
+          {showSuccessMessage ? (
+            <>
+              <CheckCircleOutlineIcon sx={{ marginRight: '0.5rem' }} />
+              Confirmed
+            </>
+          ) : (
+            'Confirm'
+          )}
         </Button>
-        <Copyright sx={{ mt: 5 }} />
+        {showSuccessMessage && (
+          <Typography sx={{ mt: 2, color: '#275C4A', textAlign: 'center' }}>
+            Code is valid!
+          </Typography>
+        )}
+        {showErrorMessage && (
+          <Typography sx={{ mt: 2, color: '#cc0000', textAlign: 'center' }}>
+            {errorMessage}
+          </Typography>
+        )}
+        <CopyRight sx={{ mt: 5 }} />
       </Box>
     </Box>
   );

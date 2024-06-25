@@ -9,9 +9,9 @@ import {
 } from '../../constants/restfulQueryConstants';
 
 function useVenues() {
-  const fetchAllVenues = useCallback(() => {
+  const fetchAllVenues = useCallback((headers) => {
     return axios
-      .get(FETCH_ALL_VENUES)
+      .get(FETCH_ALL_VENUES, headers)
       .then((response) => response.data)
       .catch((err) => {
         throw err;

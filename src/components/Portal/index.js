@@ -1,6 +1,7 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from '../../store/auth-context';
 import { styled, useTheme } from '@mui/material/styles';
-import { Link as RouterLink, Outlet } from 'react-router-dom';
+import { Link as RouterLink, Outlet, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -72,6 +73,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function Admin() {
   const theme = useTheme();
+  const authCtx = useContext(AuthContext);
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const handleDrawerOpen = () => {
@@ -88,6 +91,11 @@ export default function Admin() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleLogout = () => {
+    authCtx.logOut();
+    navigate('/login');
   };
 
   return (
@@ -129,7 +137,7 @@ export default function Admin() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem onClick={() => {}}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>
         </Toolbar>
