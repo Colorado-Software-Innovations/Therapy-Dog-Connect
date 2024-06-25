@@ -11,7 +11,6 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
   const [confirmCode, setConfirmCode] = useState(new Array(6).fill(''));
-  const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -35,29 +34,27 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
     e.preventDefault();
     setErrorMessage('');
     const code = confirmCode.join('');
-    setLoading(true); // Start loading animation
+    setLoading(true);
 
     try {
       const result = await handleConfirmationCode(e, code);
       if (result.isSignUpComplete) {
-        setIsVerified(result.isSignUpComplete); // Verification successful
-        setShowSuccessMessage(true); // Show success message
+        setShowSuccessMessage(true);
         setTimeout(() => {
           setShowSuccessMessage(false);
-          setConfirmCode(new Array(6).fill('')); // Reset confirmation code
+          setConfirmCode(new Array(6).fill(''));
           confirmComplete();
-        }, 3000); // Show success message for 3 seconds
+        }, 3000);
       }
     } catch (error) {
       setShowErrorMessage(true);
       setConfirmCode(new Array(6).fill(''));
       setErrorMessage(`Oops something went wrong. ${error}`);
     } finally {
-      setLoading(false); // Stop loading animation
+      setLoading(false);
     }
   };
 
-  // Check if all fields are filled and not loading
   const isAllFilledAndNotLoading = confirmCode.every((code) => code !== '') && !isLoading;
 
   return (
@@ -89,7 +86,7 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
               name={`code-${index}`}
               label=""
               type="text"
-              disabled={isVerified || isLoading}
+              disabled={showSuccessMessage || isLoading}
               inputProps={{ maxLength: 1, style: { textAlign: 'center' } }}
               sx={{ width: '3rem' }}
             />
@@ -98,22 +95,22 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           {isLoading && <CircularProgress />}
         </Box>
-        {isVerified ? (
-          <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled>
-            <CheckCircleOutlineIcon sx={{ marginRight: '0.5rem' }} />
-            Confirmed
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={!isAllFilledAndNotLoading}
-          >
-            Confirm
-          </Button>
-        )}
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          disabled={!isAllFilledAndNotLoading}
+        >
+          {showSuccessMessage ? (
+            <>
+              <CheckCircleOutlineIcon sx={{ marginRight: '0.5rem' }} />
+              Confirmed
+            </>
+          ) : (
+            'Confirm'
+          )}
+        </Button>
         {showSuccessMessage && (
           <Typography sx={{ mt: 2, color: '#275C4A', textAlign: 'center' }}>
             Code is valid!

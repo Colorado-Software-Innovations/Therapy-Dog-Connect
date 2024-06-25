@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
@@ -14,19 +13,20 @@ function Index() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
   const authCtx = useContext(AuthContext);
-  const [showLoginForm, setShowLoginForm] = useState(true);
-  const [showSignUpForm, setShowSignUpForm] = useState(false);
-  const [showConfirmationCode, setShowConfirmationCode] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [state, setState] = useState({
+    showLoginForm: true,
+    showSignUpForm: false,
+    showConfirmationCode: false,
+    errorMessage: '',
+  });
 
   const handleLogin = async (e, email, password) => {
     try {
-      setErrorMessage('');
-
+      setState((prevState) => ({ ...prevState, errorMessage: '' }));
       e.preventDefault();
       const resp = await authCtx.logIn(email, password);
       if (resp && resp.nextStep) {
-        setShowLoginForm(false);
+        setState((prevState) => ({ ...prevState, showLoginForm: false }));
       }
       if (resp.isSignedIn) {
         authCtx.isLoggedIn = resp.isSignedIn;
@@ -34,58 +34,69 @@ function Index() {
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage('Incorrect username or password.');
+      setState((prevState) => ({ ...prevState, errorMessage: 'Incorrect username or password.' }));
     }
   };
 
   const handleConfirmationCode = async (e, code) => {
     e.preventDefault();
-    return confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code })
-      .then((resp) => {
-        if (resp.isSignUpComplete) {
-          return resp;
-        }
-      })
-      .catch((err) => err);
+    try {
+      const resp = await confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code });
+      if (resp.isSignUpComplete) {
+        return resp;
+      }
+    } catch (err) {
+      return err;
+    }
   };
 
   const toggle = () => {
-    setShowLoginForm(!showLoginForm);
-    setShowSignUpForm(showLoginForm);
+    setState((prevState) => ({
+      ...prevState,
+      showLoginForm: !prevState.showLoginForm,
+      showSignUpForm: prevState.showLoginForm,
+    }));
   };
 
   const handleSignUp = async (e, email, password, phoneNumber) => {
     authCtx.setSignUpEmail(email);
-    const { isSignUpComplete, userId, nextStep } = await signUp({
+    const { isSignUpComplete } = await signUp({
       username: email,
       password,
       options: {
         userAttributes: {
           email,
-          phone_number: phoneNumber ? phoneNumber : '+15555555555', // E.164 number convention
+          phone_number: phoneNumber || '+15555555555', // E.164 number convention
         },
       },
     });
     if (!isSignUpComplete) {
-      setShowSignUpForm(false);
-      setShowConfirmationCode(true);
+      setState((prevState) => ({
+        ...prevState,
+        showSignUpForm: false,
+        showConfirmationCode: true,
+      }));
     }
   };
 
   const handleConfirmComplete = () => {
-    setShowConfirmationCode(false);
-    setShowLoginForm(true);
+    setState((prevState) => ({
+      ...prevState,
+      showConfirmationCode: false,
+      showLoginForm: true,
+    }));
   };
+
   return (
     <Grid container spacing={2}>
       {isMobile ? (
         <>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && (
-              <LoginForm handleLogin={handleLogin} toggle={toggle} error={errorMessage} />
+            {state.showLoginForm && (
+              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
             )}
-            {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
-            {showConfirmationCode && (
+            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+            {state.showConfirmationCode && (
               <ConfirmCode
                 handleConfirmationCode={handleConfirmationCode}
                 confirmComplete={handleConfirmComplete}
@@ -102,11 +113,11 @@ function Index() {
             <Image />
           </Grid>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && (
-              <LoginForm toggle={toggle} handleLogin={handleLogin} error={errorMessage} />
+            {state.showLoginForm && (
+              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
             )}
-            {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
-            {showConfirmationCode && (
+            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+            {state.showConfirmationCode && (
               <ConfirmCode
                 handleConfirmationCode={handleConfirmationCode}
                 confirmComplete={handleConfirmComplete}
