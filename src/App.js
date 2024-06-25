@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Amplify } from 'aws-amplify';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home/index';
@@ -10,7 +10,7 @@ import RequestDemo from './components/RequestADemo';
 import Login from './components/Login';
 import AdminHome from './components/Portal';
 import MainAppBar from './components/UI/AppBar/AppBar';
-
+import { AuthContext } from './store/auth-context';
 import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
@@ -21,7 +21,7 @@ import SnackbarAlert from './components/UI/SnackBarAlert';
 
 Amplify.configure(config);
 function App() {
-
+  const authCtx = useContext(AuthContext);
 
   return (
     <div className="App">
@@ -35,25 +35,27 @@ function App() {
         <Route path="/request  demo" element={<RequestDemo />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path="/admin" element={<AdminHome />}>
-          <Route
-            path="hospitals"
-            element={
-              <HospitalContextProvider>
-                <Hospitals />
-              </HospitalContextProvider>
-            }
-          />
-          <Route
-            path="hospitals/:id"
-            element={
-              <HospitalContextProvider>
-                <Details />
-              </HospitalContextProvider>
-            }
-          />
-          <Route path="chat" element={<Chat />} />
-        </Route>
+        {authCtx.isLoggedIn && (
+          <Route path="/admin" element={<AdminHome />}>
+            <Route
+              path="hospitals"
+              element={
+                <HospitalContextProvider>
+                  <Hospitals />
+                </HospitalContextProvider>
+              }
+            />
+            <Route
+              path="hospitals/:id"
+              element={
+                <HospitalContextProvider>
+                  <Details />
+                </HospitalContextProvider>
+              }
+            />
+            <Route path="chat" element={<Chat />} />
+          </Route>
+        )}
       </Routes>
       <SnackbarAlert />
     </div>
