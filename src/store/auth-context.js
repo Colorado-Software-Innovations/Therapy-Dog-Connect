@@ -26,6 +26,7 @@ function AuthContextProvider({ children }) {
         setCurrentUser(user);
         setIsSignedIn(true);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
     };
