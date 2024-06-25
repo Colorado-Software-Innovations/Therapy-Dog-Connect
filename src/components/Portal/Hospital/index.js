@@ -103,7 +103,7 @@ export default function Hospital() {
         });
     });
     //setHospitalState({ data: hospitals });
-  }, [fetchAllVenues]);
+  }, [authCtx.token, fetchAllVenues, notificationCtx]);
 
   const rows = hospitalState.data.map((hospital) => {
     return {

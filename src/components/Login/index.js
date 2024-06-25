@@ -33,7 +33,6 @@ function Index() {
         navigate('/admin');
       }
     } catch (err) {
-      console.error(err);
       setState((prevState) => ({ ...prevState, errorMessage: 'Incorrect username or password.' }));
     }
   };
