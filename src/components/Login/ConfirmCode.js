@@ -5,10 +5,15 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import PasswordIcon from '@mui/icons-material/Password';
 import Typography from '@mui/material/Typography';
-import Copyright from '../UI/CopyRight';
+import CopyRight from '../UI/CopyRight';
+import CircularProgress from '@mui/material/CircularProgress';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-const ConfirmCode = ({ handleConfirmationCode }) => {
+const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
   const [confirmCode, setConfirmCode] = useState(new Array(6).fill(''));
+  const [isVerified, setIsVerified] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const inputRefs = useRef([]);
 
   const handleChange = (e, index) => {
@@ -27,8 +32,29 @@ const ConfirmCode = ({ handleConfirmationCode }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const code = confirmCode.join('');
-    handleConfirmationCode(e, code);
+    setLoading(true); // Start loading animation
+
+    try {
+      const result = await handleConfirmationCode(e, code);
+      if (result.isSignUpComplete) {
+        setIsVerified(result.isSignUpComplete); // Verification successful
+        setShowSuccessMessage(true); // Show success message
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          setConfirmCode(new Array(6).fill('')); // Reset confirmation code
+          confirmComplete();
+        }, 3000); // Show success message for 3 seconds
+      }
+    } catch (error) {
+      console.error('Error confirming code:', error);
+      // Handle error if verification fails (optional)
+    } finally {
+      setLoading(false); // Stop loading animation
+    }
   };
+
+  // Check if all fields are filled and not loading
+  const isAllFilledAndNotLoading = confirmCode.every((code) => code !== '') && !isLoading;
 
   return (
     <Box
@@ -59,15 +85,37 @@ const ConfirmCode = ({ handleConfirmationCode }) => {
               name={`code-${index}`}
               label=""
               type="text"
+              disabled={isVerified || isLoading}
               inputProps={{ maxLength: 1, style: { textAlign: 'center' } }}
               sx={{ width: '3rem' }}
             />
           ))}
         </Box>
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-          Confirm
-        </Button>
-        <Copyright sx={{ mt: 5 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          {isLoading && <CircularProgress />}
+        </Box>
+        {isVerified ? (
+          <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled>
+            <CheckCircleOutlineIcon sx={{ marginRight: '0.5rem' }} />
+            Confirmed
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={!isAllFilledAndNotLoading}
+          >
+            Confirm
+          </Button>
+        )}
+        {showSuccessMessage && (
+          <Typography sx={{ mt: 2, color: '#275C4A', textAlign: 'center' }}>
+            Code is valid!
+          </Typography>
+        )}
+        <CopyRight sx={{ mt: 5 }} />
       </Box>
     </Box>
   );

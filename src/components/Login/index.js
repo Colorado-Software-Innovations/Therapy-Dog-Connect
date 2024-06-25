@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
@@ -56,7 +56,13 @@ function Index() {
   const handleConfirmationCode = async (e, code) => {
     try {
       e.preventDefault();
-      const result = await confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code });
+      return confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code }).then(
+        (resp) => {
+          if (resp.isSignUpComplete) {
+            return resp;
+          }
+        },
+      );
     } catch (err) {
       console.error(err);
     }
@@ -85,6 +91,10 @@ function Index() {
     }
   };
 
+  const handleConfirmComplete = () => {
+    setShowConfirmationCode(false);
+    setShowLoginForm(true);
+  };
   return (
     <Grid container spacing={2}>
       {isMobile ? (
@@ -94,7 +104,10 @@ function Index() {
             {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
             {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
             {showConfirmationCode && (
-              <ConfirmCode handleConfirmationCode={handleConfirmationCode} />
+              <ConfirmCode
+                handleConfirmationCode={handleConfirmationCode}
+                confirmComplete={handleConfirmComplete}
+              />
             )}
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
@@ -110,7 +123,10 @@ function Index() {
             {showLoginForm && <LoginForm toggle={toggle} handleLogin={handleLogin} />}
             {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
             {showConfirmationCode && (
-              <ConfirmCode handleConfirmationCode={handleConfirmationCode} />
+              <ConfirmCode
+                handleConfirmationCode={handleConfirmationCode}
+                confirmComplete={handleConfirmComplete}
+              />
             )}
             {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
           </Grid>
