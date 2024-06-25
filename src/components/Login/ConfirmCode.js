@@ -14,6 +14,8 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const inputRefs = useRef([]);
 
   const handleChange = (e, index) => {
@@ -31,6 +33,7 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     const code = confirmCode.join('');
     setLoading(true); // Start loading animation
 
@@ -46,8 +49,9 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
         }, 3000); // Show success message for 3 seconds
       }
     } catch (error) {
-      console.error('Error confirming code:', error);
-      // Handle error if verification fails (optional)
+      setShowErrorMessage(true);
+      setConfirmCode(new Array(6).fill(''));
+      setErrorMessage(`Oops something went wrong. ${error}`);
     } finally {
       setLoading(false); // Stop loading animation
     }
@@ -113,6 +117,11 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
         {showSuccessMessage && (
           <Typography sx={{ mt: 2, color: '#275C4A', textAlign: 'center' }}>
             Code is valid!
+          </Typography>
+        )}
+        {showErrorMessage && (
+          <Typography sx={{ mt: 2, color: '#cc0000', textAlign: 'center' }}>
+            {errorMessage}
           </Typography>
         )}
         <CopyRight sx={{ mt: 5 }} />
