@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Copyright from '../UI/CopyRight';
 import Grid from '@mui/material/Grid';
 
-const LoginForm = ({ handleLogin }) => {
+const LoginForm = ({ handleLogin, toggle }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   return (
@@ -75,6 +75,13 @@ const LoginForm = ({ handleLogin }) => {
             <Link href="#" variant="body2">
               Forgot password?
             </Link>
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Grid item xs>
+            <Button href="#" variant="body2" onClick={toggle}>
+              Sign Up
+            </Button>
           </Grid>
         </Grid>
         <Copyright sx={{ mt: 5 }} />

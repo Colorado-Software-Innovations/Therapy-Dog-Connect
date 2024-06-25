@@ -81,7 +81,7 @@ export default function Hospital() {
     email: '',
   });
   const navigate = useNavigate();
-  // const authCtx = useContext(AuthContext);
+  const authCtx = useContext(AuthContext);
   const hospitalCtx = useContext(HospitalContext);
   const notificationCtx = useContext(NotificationContext);
   const { addAddress } = useAddress();
@@ -89,21 +89,21 @@ export default function Hospital() {
   const { addPerson } = usePerson();
 
   useEffect(() => {
-    // Promise.try(() => {
-    //   fetchAllVenues()
-    //     .then((response) => {
-    //       setHospitalState((prevState) => ({
-    //         ...prevState,
-    //         isLoading: false,
-    //         data: response,
-    //       }));
-    //     })
-    //     .catch((error) => {
-    //       notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
-    //     });
-    // });
-    setHospitalState({ data: hospitals });
-  }, [fetchAllVenues, notificationCtx]);
+    Promise.try(() => {
+      fetchAllVenues({ headers: { Authorization: `Bearer ${authCtx.token}` } })
+        .then((response) => {
+          setHospitalState((prevState) => ({
+            ...prevState,
+            isLoading: false,
+            data: response,
+          }));
+        })
+        .catch((error) => {
+          notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
+        });
+    });
+    //setHospitalState({ data: hospitals });
+  }, [fetchAllVenues]);
 
   const rows = hospitalState.data.map((hospital) => {
     return {

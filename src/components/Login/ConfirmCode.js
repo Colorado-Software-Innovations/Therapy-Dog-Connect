@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -8,7 +8,27 @@ import Typography from '@mui/material/Typography';
 import Copyright from '../UI/CopyRight';
 
 const ConfirmCode = ({ handleConfirmationCode }) => {
-  const [confirmCode, setConfirmCode] = useState('');
+  const [confirmCode, setConfirmCode] = useState(new Array(6).fill(''));
+  const inputRefs = useRef([]);
+
+  const handleChange = (e, index) => {
+    const value = e.target.value;
+    if (/^[0-9]$/.test(value) || value === '') {
+      const newCode = [...confirmCode];
+      newCode[index] = value;
+      setConfirmCode(newCode);
+
+      if (value !== '' && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const code = confirmCode.join('');
+    handleConfirmationCode(e, code);
+  };
 
   return (
     <Box
@@ -26,30 +46,25 @@ const ConfirmCode = ({ handleConfirmationCode }) => {
       <Typography component="h1" variant="h5">
         We sent you a code to your email. Please confirm below.
       </Typography>
-      <Box
-        component="form"
-        noValidate
-        onSubmit={(e) => handleConfirmationCode(e, confirmCode)}
-        sx={{ mt: 1 }}
-      >
-        <TextField
-          onChange={(e) => setConfirmCode(e.target.value)}
-          margin="normal"
-          required
-          fullWidth
-          name="code"
-          label="Code"
-          type="number"
-          id="code"
-        />
-
-        <Button
-          onSubmit={(e) => handleConfirmationCode(e, confirmCode)}
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
+      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+          {confirmCode.map((_, index) => (
+            <TextField
+              key={index}
+              inputRef={(el) => (inputRefs.current[index] = el)}
+              onChange={(e) => handleChange(e, index)}
+              value={confirmCode[index]}
+              margin="normal"
+              required
+              name={`code-${index}`}
+              label=""
+              type="text"
+              inputProps={{ maxLength: 1, style: { textAlign: 'center' } }}
+              sx={{ width: '3rem' }}
+            />
+          ))}
+        </Box>
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Confirm
         </Button>
         <Copyright sx={{ mt: 5 }} />

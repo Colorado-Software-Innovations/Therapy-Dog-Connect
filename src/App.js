@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Amplify } from 'aws-amplify';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home/index';
@@ -10,7 +10,7 @@ import RequestDemo from './components/RequestADemo';
 import Login from './components/Login';
 import AdminHome from './components/Portal';
 import MainAppBar from './components/UI/AppBar/AppBar';
-import { AuthContext } from './store/auth-context';
+
 import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
@@ -21,8 +21,7 @@ import SnackbarAlert from './components/UI/SnackBarAlert';
 
 Amplify.configure(config);
 function App() {
-  const authCtx = useContext(AuthContext);
-  authCtx.setIsAuthenticated(true);
+
 
   return (
     <div className="App">
