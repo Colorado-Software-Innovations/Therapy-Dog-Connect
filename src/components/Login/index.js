@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext } from 'react';
-import { Button, Grid, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
-import { signUp } from 'aws-amplify/auth';
+import { signUp, confirmSignUp } from 'aws-amplify/auth';
 import LoginForm from './Form';
 import ChangePassword from './ChangePassword';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
 import ConfirmCode from './ConfirmCode';
 import SignUpForm from '../SignUp/Form';
-import { confirmSignUp } from 'aws-amplify/auth';
+
 function Index() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
