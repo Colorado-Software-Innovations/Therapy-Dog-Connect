@@ -174,13 +174,13 @@ const SignUpForm = ({ handleSignUp, toggle }) => {
         <Grid container>
           <Grid item xs>
             <Link href="#" variant="body2">
-              Forgot password?
+              <Button style={styles.button}>Forgot Password?</Button>
             </Link>
           </Grid>
         </Grid>
         <Grid container>
           <Grid item xs>
-            <Button variant="body2" onClick={toggle}>
+            <Button style={styles.button} onClick={toggle}>
               Already have an account? Sign in
             </Button>
           </Grid>
@@ -189,6 +189,20 @@ const SignUpForm = ({ handleSignUp, toggle }) => {
       </Box>
     </Box>
   );
+};
+
+const styles = {
+  button: {
+    margin: 0,
+    fontFamily: 'Noto Sans, Roboto, Arial, sans-serif',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    lineHeight: 1.43,
+    color: '#275C4A',
+    textTransform: 'none',
+    textDecoration: 'underline',
+    textDecorationColor: 'rgba(39, 92, 74, 0.4)',
+  },
 };
 
 export default SignUpForm;

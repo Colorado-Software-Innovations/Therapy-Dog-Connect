@@ -4,7 +4,6 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
@@ -123,14 +122,12 @@ const LoginForm = ({ handleLogin, toggle, error }) => {
         </Button>
         <Grid container>
           <Grid item xs>
-            <Link href="#" variant="body2">
-              Forgot password?
-            </Link>
+            <Button style={styles.button}>Forgot Password?</Button>
           </Grid>
         </Grid>
         <Grid container>
           <Grid item xs>
-            <Button href="#" variant="body2" onClick={toggle}>
+            <Button style={styles.button} onClick={toggle}>
               Sign Up
             </Button>
           </Grid>
@@ -140,6 +137,20 @@ const LoginForm = ({ handleLogin, toggle, error }) => {
       </Box>
     </Box>
   );
+};
+
+const styles = {
+  button: {
+    margin: 0,
+    fontFamily: 'Noto Sans, Roboto, Arial, sans-serif',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    lineHeight: 1.43,
+    color: '#275C4A',
+    textTransform: 'none',
+    textDecoration: 'underline',
+    textDecorationColor: 'rgba(39, 92, 74, 0.4)',
+  },
 };
 
 export default LoginForm;
