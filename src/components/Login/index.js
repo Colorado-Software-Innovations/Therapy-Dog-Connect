@@ -4,7 +4,6 @@ import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
 import LoginForm from './Form';
-import ChangePassword from './ChangePassword';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
 import ConfirmCode from './ConfirmCode';
@@ -16,20 +15,18 @@ function Index() {
   const navigate = useNavigate();
   const authCtx = useContext(AuthContext);
   const [showLoginForm, setShowLoginForm] = useState(true);
-  const [showChangePassword, setShowChangePassword] = useState(false);
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [showConfirmationCode, setShowConfirmationCode] = useState(false);
-  const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e, email, password) => {
     try {
-      setEmail(email);
+      setErrorMessage('');
+
       e.preventDefault();
-      //authCtx.logOut();
       const resp = await authCtx.logIn(email, password);
       if (resp && resp.nextStep) {
         setShowLoginForm(false);
-        setShowChangePassword(true);
       }
       if (resp.isSignedIn) {
         authCtx.isLoggedIn = resp.isSignedIn;
@@ -37,35 +34,19 @@ function Index() {
       }
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const handleChangePassword = async (e, password) => {
-    try {
-      e.preventDefault();
-      const resp = await authCtx.confirmLogin(email, password);
-      if (resp.nextStep.signInStep === 'DONE' && resp.isSignedIn) {
-        setShowChangePassword(false);
-        navigate('/admin');
-      }
-    } catch (err) {
-      console.error(err);
+      setErrorMessage('Incorrect username or password.');
     }
   };
 
   const handleConfirmationCode = async (e, code) => {
-    try {
-      e.preventDefault();
-      return confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code }).then(
-        (resp) => {
-          if (resp.isSignUpComplete) {
-            return resp;
-          }
-        },
-      );
-    } catch (err) {
-      console.error(err);
-    }
+    e.preventDefault();
+    return confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code })
+      .then((resp) => {
+        if (resp.isSignUpComplete) {
+          return resp;
+        }
+      })
+      .catch((err) => err);
   };
 
   const toggle = () => {
@@ -100,9 +81,10 @@ function Index() {
       {isMobile ? (
         <>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && <LoginForm handleLogin={handleLogin} toggle={toggle} />}
+            {showLoginForm && (
+              <LoginForm handleLogin={handleLogin} toggle={toggle} error={errorMessage} />
+            )}
             {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
-            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
             {showConfirmationCode && (
               <ConfirmCode
                 handleConfirmationCode={handleConfirmationCode}
@@ -120,7 +102,9 @@ function Index() {
             <Image />
           </Grid>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
-            {showLoginForm && <LoginForm toggle={toggle} handleLogin={handleLogin} />}
+            {showLoginForm && (
+              <LoginForm toggle={toggle} handleLogin={handleLogin} error={errorMessage} />
+            )}
             {showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
             {showConfirmationCode && (
               <ConfirmCode
@@ -128,7 +112,6 @@ function Index() {
                 confirmComplete={handleConfirmComplete}
               />
             )}
-            {showChangePassword && <ChangePassword handleChangePassword={handleChangePassword} />}
           </Grid>
         </>
       )}

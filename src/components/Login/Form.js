@@ -16,7 +16,7 @@ import Grid from '@mui/material/Grid';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CopyRight from '../UI/CopyRight';
 
-const LoginForm = ({ handleLogin, toggle }) => {
+const LoginForm = ({ handleLogin, toggle, error }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -115,6 +115,9 @@ const LoginForm = ({ handleLogin, toggle }) => {
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
         />
+        {error && (
+          <Typography sx={{ mt: 2, color: '#cc0000', textAlign: 'center' }}>{error}</Typography>
+        )}
         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Sign In
         </Button>
@@ -132,6 +135,7 @@ const LoginForm = ({ handleLogin, toggle }) => {
             </Button>
           </Grid>
         </Grid>
+
         <CopyRight sx={{ mt: 5 }} />
       </Box>
     </Box>
