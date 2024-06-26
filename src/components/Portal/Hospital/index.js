@@ -88,9 +88,11 @@ export default function Hospital() {
   const { fetchAllVenues, addVenue } = useVenues();
   const { addPerson } = usePerson();
 
+  console.log(authCtx)
+
   useEffect(() => {
     Promise.try(() => {
-      fetchAllVenues({ headers: { Authorization: `Bearer ${authCtx.token}` } })
+      fetchAllVenues({ headers: { Authorization: `Bearer ${authCtx.token}`, 'Access-Control-Allow-Origin': '*' } })
         .then((response) => {
           setHospitalState((prevState) => ({
             ...prevState,
@@ -103,7 +105,7 @@ export default function Hospital() {
         });
     });
     //setHospitalState({ data: hospitals });
-  }, [authCtx.token, fetchAllVenues, notificationCtx]);
+  }, [authCtx.token, fetchAllVenues]);
 
   const rows = hospitalState.data.map((hospital) => {
     return {
