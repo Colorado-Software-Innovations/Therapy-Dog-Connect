@@ -70,7 +70,7 @@ const ConfirmCode = ({ handleConfirmationCode, confirmComplete }) => {
       <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
         <PasswordIcon />
       </Avatar>
-      <Typography component="h1" variant="h5">
+      <Typography component="h1" variant="h5" style={{ textAlign: 'center' }}>
         We sent you a code to your email. Please confirm below.
       </Typography>
       <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
