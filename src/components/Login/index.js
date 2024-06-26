@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
@@ -21,6 +21,12 @@ function Index() {
     showForgotPassword: false,
     errorMessage: '',
   });
+
+  useEffect(() => {
+    if (authCtx.isLoggedIn) {
+      navigate('/admin');
+    }
+  }, [authCtx.isLoggedIn, navigate]);
 
   const handleLogin = async (e, email, password) => {
     try {
