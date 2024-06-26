@@ -4,7 +4,6 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Typography from '@mui/material/Typography';
@@ -171,13 +170,7 @@ const SignUpForm = ({ handleSignUp, toggle }) => {
         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Sign Up
         </Button>
-        <Grid container>
-          <Grid item xs>
-            <Link href="#" variant="body2">
-              <Button style={styles.button}>Forgot Password?</Button>
-            </Link>
-          </Grid>
-        </Grid>
+
         <Grid container>
           <Grid item xs>
             <Button style={styles.button} onClick={toggle}>

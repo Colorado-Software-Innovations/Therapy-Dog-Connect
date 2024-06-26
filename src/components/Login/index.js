@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
 import ConfirmCode from './ConfirmCode';
 import SignUpForm from '../SignUp/Form';
+import ForgotPassword from './ForgotPassword';
 
 function Index() {
   const theme = useTheme();
@@ -17,6 +18,7 @@ function Index() {
     showLoginForm: true,
     showSignUpForm: false,
     showConfirmationCode: false,
+    showForgotPassword: false,
     errorMessage: '',
   });
 
@@ -86,13 +88,37 @@ function Index() {
     }));
   };
 
+  const forgotPassword = () => {
+    setState({
+      showLoginForm: false,
+      showSignUpForm: false,
+      showConfirmationCode: false,
+      showForgotPassword: true,
+      errorMessage: '',
+    });
+  };
+
+  const handleBackToLogin = () => {
+    setState({
+      showLoginForm: true,
+      showSignUpForm: false,
+      showConfirmationCode: false,
+      showForgotPassword: false,
+      errorMessage: '',
+    });
+  };
   return (
     <Grid container spacing={2}>
       {isMobile ? (
         <>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
             {state.showLoginForm && (
-              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
+              <LoginForm
+                handleLogin={handleLogin}
+                toggle={toggle}
+                error={state.errorMessage}
+                forgotPassword={forgotPassword}
+              />
             )}
             {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
             {state.showConfirmationCode && (
@@ -101,6 +127,7 @@ function Index() {
                 confirmComplete={handleConfirmComplete}
               />
             )}
+            {state.showForgotPassword && <ForgotPassword handleBackToLogin={handleBackToLogin} />}
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
             <Image />
@@ -113,7 +140,12 @@ function Index() {
           </Grid>
           <Grid item xs={12} sm={8} md={5} elevation={6} style={styles.gridItemRight}>
             {state.showLoginForm && (
-              <LoginForm handleLogin={handleLogin} toggle={toggle} error={state.errorMessage} />
+              <LoginForm
+                handleLogin={handleLogin}
+                toggle={toggle}
+                error={state.errorMessage}
+                forgotPassword={forgotPassword}
+              />
             )}
             {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
             {state.showConfirmationCode && (
@@ -122,6 +154,7 @@ function Index() {
                 confirmComplete={handleConfirmComplete}
               />
             )}
+            {state.showForgotPassword && <ForgotPassword handleBackToLogin={handleBackToLogin} />}
           </Grid>
         </>
       )}

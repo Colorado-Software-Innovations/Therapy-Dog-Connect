@@ -14,8 +14,9 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Grid from '@mui/material/Grid';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CopyRight from '../UI/CopyRight';
+import validateEmail from '../../utils/EmailValidation.js';
 
-const LoginForm = ({ handleLogin, toggle, error }) => {
+const LoginForm = ({ handleLogin, toggle, error, forgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,12 +24,6 @@ const LoginForm = ({ handleLogin, toggle, error }) => {
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const validateEmail = (email) => {
-    // Basic email regex for validation
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
   };
 
   const handleSubmit = (e) => {
@@ -122,7 +117,9 @@ const LoginForm = ({ handleLogin, toggle, error }) => {
         </Button>
         <Grid container>
           <Grid item xs>
-            <Button style={styles.button}>Forgot Password?</Button>
+            <Button onClick={forgotPassword} style={styles.button}>
+              Forgot Password?
+            </Button>
           </Grid>
         </Grid>
         <Grid container>
