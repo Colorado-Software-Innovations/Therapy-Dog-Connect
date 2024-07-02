@@ -22,7 +22,6 @@ import SnackbarAlert from './components/UI/SnackBarAlert';
 Amplify.configure(config);
 function App() {
   const authCtx = useContext(AuthContext);
-
   return (
     <div className="App">
       <MainAppBar />

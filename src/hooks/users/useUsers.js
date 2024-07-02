@@ -1,8 +1,13 @@
 import { useCallback } from 'react';
 import axios from 'axios';
-import { ADD_PERSON, DELETE_PERSON, UPDATE_PERSON } from '../../constants/restfulQueryConstants';
+import {
+  ADD_PERSON,
+  DELETE_PERSON,
+  UPDATE_PERSON,
+  GET_USERS_BY_VENUE_ID,
+} from '../../constants/restfulQueryConstants';
 
-function usePerson() {
+function useUser() {
   const addPerson = useCallback((payload) => {
     return axios
       .post(ADD_PERSON, payload)
@@ -30,11 +35,20 @@ function usePerson() {
       });
   }, []);
 
+  const getUserByVenueId = useCallback((venue_id) => {
+    return axios
+      .get(GET_USERS_BY_VENUE_ID.replace(':id', venue_id))
+      .then((response) => response)
+      .catch((err) => {
+        throw err;
+      });
+  }, []);
   return {
     addPerson,
     deletePerson,
     updatePerson,
+    getUserByVenueId,
   };
 }
 
-export default usePerson;
+export default useUser;

@@ -12,7 +12,7 @@ function useVenues() {
   const fetchAllVenues = useCallback((headers) => {
     return axios
       .get(FETCH_ALL_VENUES, headers)
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });
@@ -20,7 +20,7 @@ function useVenues() {
   const fetchVenueById = useCallback((id) => {
     return axios
       .get(FETCH_VENUE_BY_ID.replace(':id', id))
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });
@@ -29,7 +29,7 @@ function useVenues() {
   const updateVenue = useCallback((id, payload) => {
     return axios
       .put(UPDATE_VENUE.replace(':id', id), payload)
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });
@@ -38,7 +38,7 @@ function useVenues() {
   const deleteVenue = useCallback((id) => {
     return axios
       .delete(DELETE_ADDRESS.replace(':id', id))
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });

@@ -6,7 +6,7 @@ import { NotificationContext } from '../../../store/notification-context';
 import { useNavigate } from 'react-router-dom';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
-import usePerson from '../../../hooks/person/usePerson';
+import usePerson from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
 const Delete = () => {
   const [open, setOpen] = useState(false);

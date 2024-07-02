@@ -6,7 +6,7 @@ function useRooms() {
   const fetchRoomsByHospitalId = useCallback((id) => {
     return axios
       .get(FETCH_ROOM_BY_HOSPITAL_ID.replace(':id', id))
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });

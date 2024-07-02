@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Grid } from '@mui/material';
-
+import useUsers from '../../../hooks/users/useUsers';
+import { Promise } from 'bluebird';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 
-export default function UsersTable() {
+const Index = ({ venue_id }) => {
+  const { getUserByVenueId } = useUsers();
+  const [usersState, setUsersState] = useState({
+    isLoading: false,
+    name: '',
+    data: [],
+  });
   const StatusCell = ({ status }) => {
     if (status) {
       return <ToggleOffIcon sx={{ color: 'green' }} />;
@@ -17,7 +24,7 @@ export default function UsersTable() {
     { field: 'role', headerName: 'Role' },
     { field: 'user', headerName: 'User' },
     {
-      field: 'active',
+      field: 'is_active',
       headerName: 'Status',
       renderCell: (cellValues) => (
         <div>
@@ -29,33 +36,32 @@ export default function UsersTable() {
     { field: 'phone', headerName: 'Phone', width: 250 },
   ];
 
-  const data = [
-    {
-      id: 1,
-      role: 'Admin',
-      user: 'John Smith',
-
-      active: true,
-      email: 'johnsmith@hospital.com',
-      phone: '970-555-1234',
-    },
-    {
-      id: 2,
-      role: 'Volunteer',
-      user: 'Jane Doe',
-      active: false,
-      email: 'jdoe@gmail.com',
-      phone: '970-555-4321',
-    },
-    {
-      id: 3,
-      role: 'Volunteer',
-      user: 'Zach Cervi',
-      active: true,
-      email: 'zachcervi@gmail.com',
-      phone: '970-555-4983',
-    },
-  ];
+  useEffect(() => {
+    Promise.try(() => {
+      getUserByVenueId(venue_id)
+        .then((response) => {
+          const responseBody = JSON.parse(response.data['body-json'].body);
+          const data = responseBody.map((user) => {
+            return {
+              id: user.id,
+              role: user.role,
+              user: `${user.first_name} ${user.last_name}`,
+              email: user.email,
+              phone: user.phone,
+              is_active: user.is_active,
+            };
+          });
+          setUsersState((prevState) => ({
+            ...prevState,
+            isLoading: false,
+            data,
+          }));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  }, []);
 
   const handleRowClick = () => {};
   return (
@@ -64,7 +70,7 @@ export default function UsersTable() {
         <Grid item xs={12}>
           <DataGrid
             onRowClick={handleRowClick}
-            rows={data}
+            rows={usersState.data}
             columns={columns}
             density="compact"
             pageSizeOptions={[25, 50, 100]}
@@ -78,4 +84,6 @@ export default function UsersTable() {
       </Grid>
     </div>
   );
-}
+};
+
+export default Index;
