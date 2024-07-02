@@ -46,7 +46,7 @@ export default function RoomTable({ hospitalId }) {
           notificationCtx.show('error', `Error fetching rooms. ${err}`);
         });
     });
-  }, [fetchRoomsByHospitalId, params.id]);
+  }, [fetchRoomsByHospitalId, notificationCtx, params.id]);
 
   const handleAddRoom = () => {
     if (isEmpty(roomNumber)) {

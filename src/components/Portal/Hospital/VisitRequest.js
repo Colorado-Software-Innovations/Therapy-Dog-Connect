@@ -36,7 +36,7 @@ const VisitRequests = ({ hospitalId }) => {
           notificationCtx.show('error', `Oops something went wrong: ${err}`);
         });
     });
-  }, [fetchVisitsByHospitalId, hospitalId]);
+  }, [fetchVisitsByHospitalId, hospitalId, notificationCtx]);
 
   return (
     <Box>

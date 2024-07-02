@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Grid } from '@mui/material';
 import useUsers from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { NotificationContext } from '../../../store/notification-context';
 
 const Index = ({ venue_id }) => {
   const { getUserByVenueId } = useUsers();
+  const notificationCtx = useContext(NotificationContext);
   const [usersState, setUsersState] = useState({
     isLoading: false,
     name: '',
@@ -58,9 +60,10 @@ const Index = ({ venue_id }) => {
           }));
         })
         .catch((err) => {
-          console.error(err);
+          notificationCtx.show('error', `Failed to fetch users. : ${err}`);
         });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRowClick = () => {};

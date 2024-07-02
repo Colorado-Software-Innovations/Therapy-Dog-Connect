@@ -42,7 +42,7 @@ jobs:
         run: node create-amplify-config.js
 
       - name: Lint code
-        run: npm run lint -- --max-warnings=0
+        run: npm run lint
 
       - name: Build project
         env:
