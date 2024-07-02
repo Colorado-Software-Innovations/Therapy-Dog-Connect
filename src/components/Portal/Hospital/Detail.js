@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useContext, useState, useEffect } from 'react';
 
-import { AuthContext } from '../../../store/auth-context';
 import { useParams } from 'react-router-dom';
 import LoadingOverlay from '../../UI/LoadingOverlay';
 import { Promise } from 'bluebird';
@@ -22,29 +21,22 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import RoomTable from './AddRoom';
 import useAddress from '../../../hooks/address/useAddress';
-import useVisits from '../../../hooks/visits/useVisits';
 import useVenues from '../../../hooks/venues/useVenues';
-import usePerson from '../../../hooks/person/usePerson';
+import usePerson from '../../../hooks/users/useUsers';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
-import UsersTable from '../Users/Table';
-import hospitalDetails from '../../../mockData/hospitalDetails';
+import Users from '../Users';
 
 const Details = () => {
-  const [hospital, setHospital] = useState(hospitalDetails);
+  const [hospital, setHospital] = useState();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [visitState, setVisitState] = useState({
-    isLoading: false,
-    data: [],
-  });
   const [tab, setTab] = useState(0);
 
-  const authCtx = useContext(AuthContext);
   const notificationCtx = useContext(NotificationContext);
 
   const params = useParams();
   const { updateAddress } = useAddress();
-  const { fetchVisitsByHospitalId } = useVisits();
+
   const { fetchVenueById, updateVenue } = useVenues();
   const { updatePerson } = usePerson();
 
@@ -81,7 +73,7 @@ const Details = () => {
           notificationCtx.show('error', `Something went wrong with updating the address: ${error}`),
         );
 
-      const personPromise = updatePerson(hospital.Person.id, contactPayload)
+      const personPromise = updatePerson(hospital.User.id, contactPayload)
         .then((response) => response)
         .catch((error) =>
           notificationCtx.show('error', `Something went wrong with updating the contact: ${error}`),
@@ -102,35 +94,19 @@ const Details = () => {
     }
   };
 
-  // useEffect(() => {
-  //   Promise.try(() => {
-  //     fetchVenueById(params.id)
-  //       .then((response) => {
-  //         setIsLoading(false);
-  //         setHospital(response);
-  //       })
-  //       .catch((error) => {
-  //         notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
-  //       });
-  //   });
-  // }, [fetchVenueById, notificationCtx, params.id]);
-
-  // useEffect(() => {
-  //   setVisitState((prevState) => ({ ...prevState, isLoading: true }));
-  //   Promise.try(() => {
-  //     fetchVisitsByHospitalId(params.id)
-  //       .then((response) => {
-  //         setVisitState((prevState) => ({
-  //           ...prevState,
-  //           isLoading: false,
-  //           data: response.data,
-  //         }));
-  //       })
-  //       .catch((err) => {
-  //         notificationCtx.show('error', `Oops something went wrong: ${err}`);
-  //       });
-  //   });
-  // }, [fetchVisitsByHospitalId, notificationCtx, params.id]);
+  useEffect(() => {
+    Promise.try(() => {
+      fetchVenueById(params.id)
+        .then((response) => {
+          const responseBody = JSON.parse(response.data['body-json'].body);
+          setIsLoading(false);
+          setHospital(responseBody[0]);
+        })
+        .catch((error) => {
+          notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
+        });
+    });
+  }, [fetchVenueById, notificationCtx, params.id]);
 
   const handleCancelClick = () => {
     setIsEditing(false);
@@ -188,10 +164,10 @@ const Details = () => {
             handleCancelClick={handleCancelClick}
             initialValues={{
               id: hospital.id,
-              email: hospital.Person.email,
-              first_name: hospital.Person.first_name,
-              last_name: hospital.Person.last_name,
-              phone: hospital.Person.phone,
+              email: hospital.User.email,
+              first_name: hospital.User.first_name,
+              last_name: hospital.User.last_name,
+              phone: hospital.User.phone,
               hospital_name: hospital.name,
               street_1: hospital.Address.street_1,
               street_2: hospital.Address.street_2,
@@ -252,10 +228,10 @@ const Details = () => {
                     <Box m="auto">
                       <PersonIcon style={{ fontSize: 35 }} />
                       <Typography>
-                        {hospital.Person.first_name} {hospital.Person.last_name}
+                        {hospital?.User?.first_name} {hospital?.User?.last_name}
                       </Typography>
-                      <Typography>{hospital.Person.phone}</Typography>
-                      <Typography>{hospital.Person.email}</Typography>
+                      <Typography>{hospital?.User?.phone}</Typography>
+                      <Typography>{hospital?.User?.email}</Typography>
                     </Box>
                   </Item>
                 </Grid>
@@ -281,7 +257,7 @@ const Details = () => {
                     >
                       Active Visits
                     </Typography>
-                    <VisitRequests visitState={visitState} />
+                    <VisitRequests hospitalId={hospital.id} />
                   </Item>
                 </Grid>
               </Grid>
@@ -290,7 +266,7 @@ const Details = () => {
               <RoomTable hospitalId={params.id} isAdmin={true} />
             </TabPanel>
             <TabPanel value={tab} index={2}>
-              <UsersTable />
+              <Users venue_id={hospital.id} />
             </TabPanel>
           </Box>
         )}

@@ -25,18 +25,6 @@ export default function RoomTable({ hospitalId }) {
   const params = useParams();
   const { addRoom, fetchRoomsByHospitalId } = useRooms();
 
-  useEffect(() => {
-    Promise.try(() => {
-      fetchRoomsByHospitalId(hospitalId)
-        .then((data) => {
-          setRooms(data);
-        })
-        .catch((err) => {
-          notificationCtx.show('error', `Error fetching rooms: ${err}`);
-        });
-    });
-  }, [fetchRoomsByHospitalId, hospitalId, notificationCtx]);
-
   const AddRoomButton = () => {
     return (
       <Grid item xs={12} style={{ margin: 20 }}>
@@ -50,8 +38,9 @@ export default function RoomTable({ hospitalId }) {
   useEffect(() => {
     Promise.try(() => {
       fetchRoomsByHospitalId(params.id)
-        .then((data) => {
-          setRooms(data);
+        .then((response) => {
+          const responseBody = JSON.parse(response.data['body-json'].body);
+          setRooms(responseBody);
         })
         .catch((err) => {
           notificationCtx.show('error', `Error fetching rooms. ${err}`);
@@ -66,7 +55,7 @@ export default function RoomTable({ hospitalId }) {
       Promise.try(() => {
         addRoom({
           number: roomNumber,
-          venueId: hospitalId,
+          venue_id: hospitalId,
         }).then((response) => {
           if (response.status === 200) {
             notificationCtx.show('success', `Room: ${roomNumber} created successfully.`);
@@ -83,10 +72,12 @@ export default function RoomTable({ hospitalId }) {
   const handleChange = (e) => {
     setRoomNumber(e.target.value);
   };
-  const rows = rooms.map((room) => ({
-    id: room.id,
-    number: room.number,
-  }));
+  const rows = rooms.length
+    ? rooms.map((room) => ({
+        id: room.id,
+        number: room.number,
+      }))
+    : [];
 
   const style = {
     position: 'absolute',

@@ -11,7 +11,7 @@ function useAddress() {
   const fetchAddressById = useCallback((id) => {
     return axios
       .get(FETCH_ADDRESS_BY_ID.replace(':id', id))
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });

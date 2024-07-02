@@ -29,17 +29,17 @@ import LoadingOverlay from '../../UI/LoadingOverlay';
 import Breadcrumb from '../../UI/BreadCrumb';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
-import usePerson from '../../../hooks/person/usePerson';
-import hospitals from '../../../mockData/hospital';
+import usePerson from '../../../hooks/users/useUsers';
+
 const columns = [
-  { field: 'id', headerName: 'Id', width: 70 },
+  { field: 'id', headerName: 'ID', width: 50 },
   { field: 'name', headerName: 'Hospital Name', width: 250 },
-  { field: 'isActive', headerName: 'Active', width: 70 },
-  { field: 'street', headerName: 'Street', width: 200 },
-  { field: 'street2', headerName: 'Street2', width: 70 },
+  { field: 'is_active', headerName: 'Active', width: 70 },
+  { field: 'street_1', headerName: 'Street', width: 200 },
+  { field: 'street_2', headerName: 'Street2', width: 70 },
   { field: 'city', headerName: 'City', width: 150 },
   { field: 'state', headerName: 'State', width: 70 },
-  { field: 'postalCode', headerName: 'Postal Code', width: 250 },
+  { field: 'postal_code', headerName: 'Postal Code', width: 250 },
 ];
 
 export default function Hospital() {
@@ -90,12 +90,12 @@ export default function Hospital() {
 
   useEffect(() => {
     Promise.try(() => {
-      fetchAllVenues({ headers: { Authorization: `Bearer ${authCtx.token}` } })
+      fetchAllVenues()
         .then((response) => {
           setHospitalState((prevState) => ({
             ...prevState,
             isLoading: false,
-            data: response,
+            data: JSON.parse(response.data['body-json'].body),
           }));
         })
         .catch((error) => {
@@ -109,12 +109,12 @@ export default function Hospital() {
     return {
       id: hospital.id,
       name: hospital.name,
-      isActive: hospital.isActive,
-      street: hospital.Address.street_1,
+      is_active: hospital.is_active,
+      street_1: hospital.Address.street_1,
       city: hospital.Address.city,
       state: hospital.Address.state,
-      street2: hospital.Address.street_2,
-      postalCode: hospital.Address.postalCode,
+      street_2: hospital.Address.street_2,
+      postal_code: hospital.Address.postal_code,
       addressId: hospital.Address.id,
     };
   });
@@ -286,6 +286,11 @@ export default function Hospital() {
   };
 
   const generateHospital = (contactDetails) => {
+    setHospitalState((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+
     const contactPayload = {
       first_name: contactDetails.first_name,
       last_name: contactDetails.last_name,
@@ -297,18 +302,20 @@ export default function Hospital() {
     Promise.try(() => {
       addPerson(contactPayload)
         .then((contactResponse) => {
-          if (contactResponse.status === 201) {
-            const contactId = contactResponse.data.contactId;
+          if (contactResponse.status === 200) {
+            const responseBody = JSON.parse(contactResponse['body-json'].body);
+            const contactId = responseBody.id;
             const hospitalPayload = {
               name: newHospitalState.name,
-              isActive: false,
-              personId: contactId,
+              is_active: false,
+              user_id: contactId,
             };
 
             Promise.try(() => {
               addVenue(hospitalPayload).then((hospitalResponse) => {
                 if (hospitalResponse.status === 200) {
-                  const venue_id = hospitalResponse.data.id;
+                  const responseBody = JSON.parse(hospitalResponse.data['body-json'].body);
+                  const venue_id = responseBody.id;
                   const addressPayload = {
                     street_1: newHospitalState.address.street_1,
                     street_2: newHospitalState.address.street_2,
@@ -325,9 +332,28 @@ export default function Hospital() {
                         if (addressResponse.status == 200) {
                           notificationCtx.show(
                             'success',
-                            `Hospital: ${hospitalResponse.data.name} created successfully.`,
+                            `Hospital: ${responseBody.name} created successfully.`,
                           );
-                          navigate('/hospitals');
+                          // Update the state with the new hospital
+                          setHospitalState((prevState) => ({
+                            ...prevState,
+                            data: [
+                              ...prevState.data,
+                              {
+                                id: venue_id,
+                                name: newHospitalState.name,
+                                is_active: false,
+                                street_1: newHospitalState.address.street_1,
+                                street_2: newHospitalState.address.street_2,
+                                city: newHospitalState.address.city,
+                                state: newHospitalState.address.state,
+                                postal_code: newHospitalState.address.postal_code,
+                                addressId: addressResponse.data['body-json'].body.id,
+                              },
+                            ],
+                            isLoading: false,
+                          }));
+                          handleClose();
                         }
                       })
                       .catch((error) => {
@@ -343,10 +369,14 @@ export default function Hospital() {
         })
         .catch((error) => {
           notificationCtx.show('error', `Oops something went wrong: ${error}`);
+        })
+        .finally(() => {
+          setHospitalState((prevState) => ({
+            ...prevState,
+            isLoading: false,
+          }));
         });
     });
-
-    handleClose();
   };
 
   const steps = ['Name', 'Address', 'Contact'];

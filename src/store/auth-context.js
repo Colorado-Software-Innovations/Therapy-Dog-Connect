@@ -25,6 +25,10 @@ function AuthContextProvider({ children }) {
         const user = await getCurrentUser();
         setCurrentUser(user);
         setIsSignedIn(true);
+
+        const session = await getUserSession();
+        const token = session.tokens.accessToken.toString();
+        setToken(token);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
@@ -42,7 +46,8 @@ function AuthContextProvider({ children }) {
     if (result.isSignedIn) {
       setIsSignedIn(result.isSignedIn);
       const session = await getUserSession();
-      setToken(session.tokens.accessToken.toString());
+      const token = session.tokens.accessToken.toString();
+      setToken(token);
     }
     return result;
   };
@@ -74,6 +79,7 @@ function AuthContextProvider({ children }) {
     setSignUpEmail,
     signupEmail,
     logOut,
+    currentUser,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
