@@ -35,11 +35,62 @@ const columns = [
   { field: 'id', headerName: 'ID', width: 50 },
   { field: 'name', headerName: 'Hospital Name', width: 250 },
   { field: 'is_active', headerName: 'Active', width: 70 },
-  { field: 'street_1', headerName: 'Street', width: 200 },
-  { field: 'street_2', headerName: 'Street2', width: 70 },
-  { field: 'city', headerName: 'City', width: 150 },
-  { field: 'state', headerName: 'State', width: 70 },
-  { field: 'postal_code', headerName: 'Postal Code', width: 250 },
+  {
+    field: 'street_1',
+    headerName: 'Street',
+    width: 200,
+    renderCell: (params) => {
+      const streetValue =
+        params.row.Address && params.row.Address.street_1
+          ? params.row.Address.street_1
+          : params.row.street_1;
+      return <div className="rowitem">{streetValue}</div>;
+    },
+  },
+  {
+    field: 'street_2',
+    headerName: 'Street2',
+    width: 70,
+    renderCell: (params) => {
+      const streetValue =
+        params.row.Address && params.row.Address.street_2
+          ? params.row.Address.street_2
+          : params.row.street_2;
+      return <div className="rowitem">{streetValue}</div>;
+    },
+  },
+  {
+    field: 'city',
+    headerName: 'City',
+    width: 150,
+    renderCell: (params) => {
+      const cityValue =
+        params.row.Address && params.row.Address.city ? params.row.Address.city : params.row.city;
+      return <div className="rowitem">{cityValue}</div>;
+    },
+  },
+  {
+    field: 'state',
+    headerName: 'State',
+    width: 70,
+    renderCell: (params) => {
+        const stateValue =
+          params.row.Address && params.row.Address.state ? params.row.Address.state : params.row.state;
+      return <div className="rowitem">{stateValue}</div>;
+    },
+  },
+  {
+    field: 'postal_code',
+    headerName: 'Postal Code',
+    width: 250,
+    renderCell: (params) => {
+      const postalCodeValue =
+        params.row.Address && params.row.Address.postal_code
+          ? params.row.Address.postal_code
+          : params.row.postal_code;
+      return <div className="rowitem">{postalCodeValue}</div>;
+    },
+  },
 ];
 
 export default function Hospital() {
@@ -90,34 +141,31 @@ export default function Hospital() {
 
   useEffect(() => {
     Promise.try(() => {
-      fetchAllVenues()
-        .then((response) => {
-          setHospitalState((prevState) => ({
-            ...prevState,
-            isLoading: false,
-            data: JSON.parse(response.data['body-json'].body),
-          }));
-        })
-        .catch((error) => {
-          notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
-        });
+      if (hospitalCtx.hospitals.length === 0) {
+        fetchAllVenues()
+          .then((response) => {
+            const respBody = JSON.parse(response.data['body-json'].body);
+            if (respBody && respBody.length) {
+              setHospitalState((prevState) => ({
+                ...prevState,
+                isLoading: false,
+                data: respBody,
+              }));
+              hospitalCtx.setHospitalData(respBody);
+            }
+          })
+          .catch((error) => {
+            notificationCtx.show('error', `Failed to fetch venues. : ${error}`);
+          });
+      } else {
+        setHospitalState((prevState) => ({
+          ...prevState,
+          isLoading: false,
+          data: hospitalCtx.hospitals,
+        }));
+      }
     });
-    //setHospitalState({ data: hospitals });
-  }, [authCtx.token, fetchAllVenues, notificationCtx]);
-
-  const rows = hospitalState.data.map((hospital) => {
-    return {
-      id: hospital.id,
-      name: hospital.name,
-      is_active: hospital.is_active,
-      street_1: hospital.Address.street_1,
-      city: hospital.Address.city,
-      state: hospital.Address.state,
-      street_2: hospital.Address.street_2,
-      postal_code: hospital.Address.postal_code,
-      addressId: hospital.Address.id,
-    };
-  });
+  }, [authCtx.token, fetchAllVenues, hospitalCtx]);
 
   const handleRowClick = ({ row }) => {
     const selectedHospital = _.first(hospitalState.data.filter((data) => data.id === row.id));
@@ -303,8 +351,8 @@ export default function Hospital() {
       addPerson(contactPayload)
         .then((contactResponse) => {
           if (contactResponse.status === 200) {
-            const responseBody = JSON.parse(contactResponse['body-json'].body);
-            const contactId = responseBody.id;
+            const contactResponseBody = JSON.parse(contactResponse.data['body-json'].body);
+            const contactId = contactResponseBody.id;
             const hospitalPayload = {
               name: newHospitalState.name,
               is_active: false,
@@ -314,8 +362,8 @@ export default function Hospital() {
             Promise.try(() => {
               addVenue(hospitalPayload).then((hospitalResponse) => {
                 if (hospitalResponse.status === 200) {
-                  const responseBody = JSON.parse(hospitalResponse.data['body-json'].body);
-                  const venue_id = responseBody.id;
+                  const hospitalResponseBody = JSON.parse(hospitalResponse.data['body-json'].body);
+                  const venue_id = hospitalResponseBody.id;
                   const addressPayload = {
                     street_1: newHospitalState.address.street_1,
                     street_2: newHospitalState.address.street_2,
@@ -332,7 +380,10 @@ export default function Hospital() {
                         if (addressResponse.status == 200) {
                           notificationCtx.show(
                             'success',
-                            `Hospital: ${responseBody.name} created successfully.`,
+                            `Hospital: ${hospitalResponseBody.name} created successfully.`,
+                          );
+                          const addressResponseBody = JSON.parse(
+                            addressResponse.data['body-json'].body,
                           );
                           // Update the state with the new hospital
                           setHospitalState((prevState) => ({
@@ -348,7 +399,7 @@ export default function Hospital() {
                                 city: newHospitalState.address.city,
                                 state: newHospitalState.address.state,
                                 postal_code: newHospitalState.address.postal_code,
-                                addressId: addressResponse.data['body-json'].body.id,
+                                addressId: addressResponseBody.id,
                               },
                             ],
                             isLoading: false,
@@ -650,19 +701,23 @@ export default function Hospital() {
           </Button>
         </Grid>
         <Grid xs={12} item>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            onRowClick={handleRowClick}
-            density="compact"
-            loading={hospitalState.isLoading}
-            pageSizeOptions={[25, 50, 100]}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 25 },
-              },
-            }}
-          />
+          {hospitalState.isLoading ? (
+            <LoadingOverlay />
+          ) : (
+            <DataGrid
+              rows={hospitalState.data}
+              columns={columns}
+              onRowClick={handleRowClick}
+              density="compact"
+              loading={hospitalState.isLoading}
+              pageSizeOptions={[25, 50, 100]}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 25 },
+                },
+              }}
+            />
+          )}
         </Grid>
       </Grid>
     </>

@@ -27,9 +27,9 @@ const Delete = () => {
   const { deletePerson } = usePerson();
 
   const handleDeleteHospital = async () => {
-    const { id, Address, Person, name } = hospitalCtx.selectedHospital;
+    const { id, Address, User, name } = hospitalCtx.selectedHospital;
     const addressId = Address.id;
-    const personId = Person.id;
+    const userId = User.id;
 
     const deleteVenuePromise = deleteVenue(id)
       .then((response) => response)
@@ -39,19 +39,21 @@ const Delete = () => {
       .then((response) => response)
       .catch((err) => notificationCtx.show('error', `Error Deleting the address: ${err}`));
 
-    const deletePersonPromise = deletePerson(personId)
+    const deletePersonPromise = deletePerson(userId)
       .then((response) => response)
       .catch((err) => notificationCtx.show('error', `Error Deleting the person: ${err}`));
 
     Promise.all([deleteVenuePromise, deleteAddressPromise, deletePersonPromise])
-      .then(() => {
+      .then((resp) => {
+        console.log(resp);
         notificationCtx.show('success', `Hospital: ${name} was deleted`);
       })
       .catch((err) => {
         notificationCtx.show('error', `${err}`);
       })
       .finally(() => {
-        navigate(`/hospitals`);
+        hospitalCtx.setHospitalData(hospitalCtx.hospitals.filter((h) => h.id !== id));
+        navigate(`/admin/hospitals`);
       });
   };
 

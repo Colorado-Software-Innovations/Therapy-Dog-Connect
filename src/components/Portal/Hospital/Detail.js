@@ -106,7 +106,7 @@ const Details = () => {
           notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
         });
     });
-  }, [fetchVenueById, notificationCtx, params.id]);
+  }, []);
 
   const handleCancelClick = () => {
     setIsEditing(false);
