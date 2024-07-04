@@ -44,8 +44,7 @@ const Delete = () => {
       .catch((err) => notificationCtx.show('error', `Error Deleting the person: ${err}`));
 
     Promise.all([deleteVenuePromise, deleteAddressPromise, deletePersonPromise])
-      .then((resp) => {
-        console.log(resp);
+      .then(() => {
         notificationCtx.show('success', `Hospital: ${name} was deleted`);
       })
       .catch((err) => {

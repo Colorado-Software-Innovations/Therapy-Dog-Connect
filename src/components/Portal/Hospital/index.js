@@ -74,8 +74,10 @@ const columns = [
     headerName: 'State',
     width: 70,
     renderCell: (params) => {
-        const stateValue =
-          params.row.Address && params.row.Address.state ? params.row.Address.state : params.row.state;
+      const stateValue =
+        params.row.Address && params.row.Address.state
+          ? params.row.Address.state
+          : params.row.state;
       return <div className="rowitem">{stateValue}</div>;
     },
   },
@@ -165,6 +167,7 @@ export default function Hospital() {
         }));
       }
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authCtx.token, fetchAllVenues, hospitalCtx]);
 
   const handleRowClick = ({ row }) => {
@@ -334,6 +337,7 @@ export default function Hospital() {
   };
 
   const generateHospital = (contactDetails) => {
+    setOpen(false);
     setHospitalState((prevState) => ({
       ...prevState,
       isLoading: true,

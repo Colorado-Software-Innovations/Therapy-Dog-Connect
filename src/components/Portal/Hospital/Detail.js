@@ -83,9 +83,22 @@ const Details = () => {
         .then((values) => {
           //TODO: Add notification here
           if (values) {
+            Promise.try(() => {
+              fetchVenueById(params.id)
+                .then((response) => {
+                  const responseBody = JSON.parse(response.data['body-json'].body);
+                  setIsLoading(false);
+                  setHospital(responseBody[0]);
+                })
+                .catch((error) => {
+                  notificationCtx.show(
+                    'error',
+                    `Failed to fetch updated hospital details. ${error}`,
+                  );
+                });
+            });
             notificationCtx.show('success', `Hospital: ${hospital.id} updated successfully.`);
           }
-          //fetchHospital();
           setIsEditing(false);
         })
         .catch((error) => notificationCtx.show('error', `Oops something went wrong: ${error}`));
@@ -106,6 +119,7 @@ const Details = () => {
           notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
         });
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCancelClick = () => {
