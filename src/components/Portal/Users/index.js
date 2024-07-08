@@ -3,24 +3,18 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Grid } from '@mui/material';
 import useUsers from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import StatusCell from '../../UI/StatusCell';
 import { NotificationContext } from '../../../store/notification-context';
 
 const Index = ({ venue_id }) => {
   const { getUserByVenueId } = useUsers();
   const notificationCtx = useContext(NotificationContext);
   const [usersState, setUsersState] = useState({
-    isLoading: false,
+    isLoading: true,
     name: '',
     data: [],
   });
-  const StatusCell = ({ status }) => {
-    if (status) {
-      return <ToggleOffIcon sx={{ color: 'green' }} />;
-    }
-    return <ToggleOnIcon sx={{ color: '#c83542' }} />;
-  };
+
   const columns = [
     { field: 'id', headerName: 'Id' },
     { field: 'role', headerName: 'Role' },
