@@ -9,7 +9,9 @@ import { useParams } from 'react-router-dom';
 
 import { NotificationContext } from '../../../store/notification-context';
 import useRooms from '../../../hooks/rooms/useRooms';
+import LoadingOverlay from '../../UI/LoadingOverlay';
 export default function RoomTable({ hospitalId }) {
+  const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [roomNumber, setRoomNumber] = useState('');
@@ -36,6 +38,7 @@ export default function RoomTable({ hospitalId }) {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     Promise.try(() => {
       fetchRoomsByHospitalId(params.id)
         .then((response) => {
@@ -44,6 +47,9 @@ export default function RoomTable({ hospitalId }) {
         })
         .catch((err) => {
           notificationCtx.show('error', `Error fetching rooms. ${err}`);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     });
   }, [fetchRoomsByHospitalId, notificationCtx, params.id]);
@@ -59,7 +65,7 @@ export default function RoomTable({ hospitalId }) {
         }).then((response) => {
           if (response.status === 200) {
             notificationCtx.show('success', `Room: ${roomNumber} created successfully.`);
-            //fetchRooms();
+   
             setOpen(false);
           }
         });
@@ -79,19 +85,12 @@ export default function RoomTable({ hospitalId }) {
       }))
     : [];
 
-  const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    borderRadius: 5,
-    p: 2,
-  };
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
   return (
     <>
+             {isLoading && <LoadingOverlay />}
       <Modal
         open={open}
         onClose={handleClose}
@@ -126,7 +125,9 @@ export default function RoomTable({ hospitalId }) {
       </Modal>
       <Grid container style={{ marginTop: 20 }}>
         <Grid item xs={12}>
+ 
           <DataGrid
+            isLoading={isLoading}
             rows={rows}
             columns={columns}
             density="compact"
@@ -143,3 +144,14 @@ export default function RoomTable({ hospitalId }) {
     </>
   );
 }
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius: 5,
+  p: 2,
+};

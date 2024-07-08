@@ -30,11 +30,19 @@ import Breadcrumb from '../../UI/BreadCrumb';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
+import StatusCell from '../../UI/StatusCell';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 50 },
   { field: 'name', headerName: 'Hospital Name', width: 250 },
-  { field: 'is_active', headerName: 'Active', width: 70 },
+  {
+    field: 'is_active',
+    headerName: 'Active',
+    width: 70,
+    renderCell: (params) => {
+      return <StatusCell status={params.row.is_active} />;
+    },
+  },
   {
     field: 'street_1',
     headerName: 'Street',
@@ -167,7 +175,7 @@ export default function Hospital() {
         }));
       }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authCtx.token, fetchAllVenues, hospitalCtx]);
 
   const handleRowClick = ({ row }) => {
@@ -343,95 +351,82 @@ export default function Hospital() {
       isLoading: true,
     }));
 
-    const contactPayload = {
-      first_name: contactDetails.first_name,
-      last_name: contactDetails.last_name,
-      email: contactDetails.email,
-      phone: contactDetails.phone,
-      role: 'Admin',
+    const hospitalPayload = {
+      name: newHospitalState.name,
+      is_active: false,
     };
 
-    Promise.try(() => {
-      addPerson(contactPayload)
-        .then((contactResponse) => {
-          if (contactResponse.status === 200) {
-            const contactResponseBody = JSON.parse(contactResponse.data['body-json'].body);
-            const contactId = contactResponseBody.id;
-            const hospitalPayload = {
-              name: newHospitalState.name,
-              is_active: false,
-              user_id: contactId,
-            };
+    addVenue(hospitalPayload)
+      .then((hospitalResponse) => {
+        if (hospitalResponse.status === 200) {
+          const hospitalResponseBody = JSON.parse(hospitalResponse.data['body-json'].body);
+          const venue_id = hospitalResponseBody.id;
 
-            Promise.try(() => {
-              addVenue(hospitalPayload).then((hospitalResponse) => {
-                if (hospitalResponse.status === 200) {
-                  const hospitalResponseBody = JSON.parse(hospitalResponse.data['body-json'].body);
-                  const venue_id = hospitalResponseBody.id;
-                  const addressPayload = {
-                    street_1: newHospitalState.address.street_1,
-                    street_2: newHospitalState.address.street_2,
-                    city: newHospitalState.address.city,
-                    state: newHospitalState.address.state,
-                    postal_code: newHospitalState.address.postal_code,
-                    country: 'USA',
-                    venue_id,
-                  };
+          const contactPayload = {
+            first_name: contactDetails.first_name,
+            last_name: contactDetails.last_name,
+            email: contactDetails.email,
+            phone: contactDetails.phone,
+            role: 'Admin',
+            is_active: true,
+            venue_id, // Include venue_id in the contact payload
+          };
 
-                  Promise.try(() => {
-                    addAddress(addressPayload)
-                      .then((addressResponse) => {
-                        if (addressResponse.status == 200) {
-                          notificationCtx.show(
-                            'success',
-                            `Hospital: ${hospitalResponseBody.name} created successfully.`,
-                          );
-                          const addressResponseBody = JSON.parse(
-                            addressResponse.data['body-json'].body,
-                          );
-                          // Update the state with the new hospital
-                          setHospitalState((prevState) => ({
-                            ...prevState,
-                            data: [
-                              ...prevState.data,
-                              {
-                                id: venue_id,
-                                name: newHospitalState.name,
-                                is_active: false,
-                                street_1: newHospitalState.address.street_1,
-                                street_2: newHospitalState.address.street_2,
-                                city: newHospitalState.address.city,
-                                state: newHospitalState.address.state,
-                                postal_code: newHospitalState.address.postal_code,
-                                addressId: addressResponseBody.id,
-                              },
-                            ],
-                            isLoading: false,
-                          }));
-                          handleClose();
-                        }
-                      })
-                      .catch((error) => {
-                        throw error;
-                      });
-                  });
+          return addPerson(contactPayload).then((contactResponse) => {
+            if (contactResponse.status === 200) {
+              const contactResponseBody = JSON.parse(contactResponse.data['body-json'].body);
+
+              const addressPayload = {
+                street_1: newHospitalState.address.street_1,
+                street_2: newHospitalState.address.street_2,
+                city: newHospitalState.address.city,
+                state: newHospitalState.address.state,
+                postal_code: newHospitalState.address.postal_code,
+                country: 'USA',
+                venue_id, // Include venue_id in the address payload
+              };
+
+              return addAddress(addressPayload).then((addressResponse) => {
+                if (addressResponse.status === 200) {
+                  const addressResponseBody = JSON.parse(addressResponse.data['body-json'].body);
+                  notificationCtx.show(
+                    'success',
+                    `Hospital: ${hospitalResponseBody.name} created successfully.`,
+                  );
+
+                  // Update the state with the new hospital
+                  setHospitalState((prevState) => ({
+                    ...prevState,
+                    data: [
+                      ...prevState.data,
+                      {
+                        id: venue_id,
+                        name: newHospitalState.name,
+                        is_active: false,
+                        street_1: newHospitalState.address.street_1,
+                        street_2: newHospitalState.address.street_2,
+                        city: newHospitalState.address.city,
+                        state: newHospitalState.address.state,
+                        postal_code: newHospitalState.address.postal_code,
+                        addressId: addressResponseBody.id,
+                      },
+                    ],
+                    isLoading: false,
+                  }));
+                  handleClose();
                 }
               });
-            }).catch((error) => {
-              notificationCtx.show('error', `Oops something went wrong: ${error}`);
-            });
-          }
-        })
-        .catch((error) => {
-          notificationCtx.show('error', `Oops something went wrong: ${error}`);
-        })
-        .finally(() => {
-          setHospitalState((prevState) => ({
-            ...prevState,
-            isLoading: false,
-          }));
-        });
-    });
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        notificationCtx.show('error', `Oops something went wrong: ${error}`);
+        setHospitalState((prevState) => ({
+          ...prevState,
+          isLoading: false,
+        }));
+      });
   };
 
   const steps = ['Name', 'Address', 'Contact'];

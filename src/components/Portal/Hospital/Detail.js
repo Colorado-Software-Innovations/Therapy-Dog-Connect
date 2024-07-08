@@ -28,8 +28,9 @@ import Users from '../Users';
 
 const Details = () => {
   const [hospital, setHospital] = useState();
+  const [admin, setAdmin] = useState();
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState(0);
 
   const notificationCtx = useContext(NotificationContext);
@@ -112,6 +113,9 @@ const Details = () => {
       fetchVenueById(params.id)
         .then((response) => {
           const responseBody = JSON.parse(response.data['body-json'].body);
+          if (responseBody.length) {
+            setAdmin(responseBody[0]?.Users?.filter((u) => u.role === 'Admin' && u.is_active)[0]);
+          }
           setIsLoading(false);
           setHospital(responseBody[0]);
         })
@@ -119,7 +123,7 @@ const Details = () => {
           notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
         });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCancelClick = () => {
@@ -242,10 +246,10 @@ const Details = () => {
                     <Box m="auto">
                       <PersonIcon style={{ fontSize: 35 }} />
                       <Typography>
-                        {hospital?.User?.first_name} {hospital?.User?.last_name}
+                        {admin.first_name} {admin.last_name}
                       </Typography>
-                      <Typography>{hospital?.User?.phone}</Typography>
-                      <Typography>{hospital?.User?.email}</Typography>
+                      <Typography>{admin.phone}</Typography>
+                      <Typography>{admin.email}</Typography>
                     </Box>
                   </Item>
                 </Grid>

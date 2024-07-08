@@ -8,9 +8,10 @@ import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
+import LoadingOverlay from '../../UI/LoadingOverlay';
 const Delete = () => {
   const [open, setOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const hospitalCtx = useContext(HospitalContext);
   const notificationCtx = useContext(NotificationContext);
@@ -27,10 +28,18 @@ const Delete = () => {
   const { deletePerson } = usePerson();
 
   const handleDeleteHospital = async () => {
+    setIsLoading(true);
     const { id, Address, User, name } = hospitalCtx.selectedHospital;
-    const addressId = Address.id;
-    const userId = User.id;
+    const addressId = hospitalCtx.selectedHospital.addressId
+      ? hospitalCtx.selectedHospital.addressId
+      : Address.id;
+    const userId = hospitalCtx.selectedHospital.userId
+      ? hospitalCtx.selectedHospital.userId
+      : User.id;
 
+    const deletePersonPromise = deletePerson(userId)
+      .then((response) => response)
+      .catch((err) => notificationCtx.show('error', `Error Deleting the person: ${err}`));
     const deleteVenuePromise = deleteVenue(id)
       .then((response) => response)
       .catch((err) => notificationCtx.show('error', `Error Deleting the venue: ${err}`));
@@ -38,10 +47,6 @@ const Delete = () => {
     const deleteAddressPromise = deleteAddress(addressId)
       .then((response) => response)
       .catch((err) => notificationCtx.show('error', `Error Deleting the address: ${err}`));
-
-    const deletePersonPromise = deletePerson(userId)
-      .then((response) => response)
-      .catch((err) => notificationCtx.show('error', `Error Deleting the person: ${err}`));
 
     Promise.all([deleteVenuePromise, deleteAddressPromise, deletePersonPromise])
       .then(() => {
@@ -51,10 +56,15 @@ const Delete = () => {
         notificationCtx.show('error', `${err}`);
       })
       .finally(() => {
+        setIsLoading(false);
         hospitalCtx.setHospitalData(hospitalCtx.hospitals.filter((h) => h.id !== id));
         navigate(`/admin/hospitals`);
       });
   };
+
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
 
   const style = {
     position: 'absolute',
