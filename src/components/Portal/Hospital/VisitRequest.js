@@ -25,7 +25,7 @@ const VisitRequests = ({ hospitalId }) => {
     Promise.try(() => {
       fetchVisitsByHospitalId(hospitalId)
         .then((response) => {
-          const responseBody = JSON.parse(response.data.body);
+          const responseBody = JSON.parse(response.data['body-json'].body);
           setVisitState((prevState) => ({
             ...prevState,
             isLoading: false,
