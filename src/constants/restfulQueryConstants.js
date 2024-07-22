@@ -38,3 +38,9 @@ export const ADD_PERSON = `${BASE_URL}/user`;
 export const DELETE_PERSON = `${BASE_URL}/user/:id`;
 export const UPDATE_PERSON = `${BASE_URL}/user/:id`;
 export const GET_USERS_BY_VENUE_ID = `${BASE_URL}/user?venue_id=:id`;
+
+
+/**
+ * Volunteer Type Service
+ */
+export const FETCH_VOLUNTEER_TYPES = `${BASE_URL}/volunteer-types`;

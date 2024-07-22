@@ -22,6 +22,7 @@ import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
 import Users from '../Users';
+import VolunteerTypes from './VolunteerTypes';
 
 const Details = () => {
   const [hospital, setHospital] = useState(null);
@@ -198,6 +199,7 @@ const Details = () => {
                       <Tab label="Details" />
                       <Tab label="Rooms" />
                       <Tab label="Users" />
+                      <Tab label="Volunteer Types" />
                     </Tabs>
                   </Box>
                 </Grid>
@@ -247,6 +249,9 @@ const Details = () => {
                 </TabPanel>
                 <TabPanel value={tab} index={2}>
                   <Users venue_id={hospital.id} />
+                </TabPanel>
+                <TabPanel value={tab} index={3}>
+                  <VolunteerTypes />
                 </TabPanel>
               </Box>
             )}
