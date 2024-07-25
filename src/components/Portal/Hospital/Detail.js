@@ -16,7 +16,7 @@ import VisitRequests from './VisitRequest';
 import BreadCrumb from '../../UI/BreadCrumb';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import RoomTable from './AddRoom';
+import Rooms from './Rooms';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
@@ -245,7 +245,7 @@ const Details = () => {
                   </Grid>
                 </TabPanel>
                 <TabPanel value={tab} index={1}>
-                  <RoomTable hospitalId={params.id} isAdmin={true} />
+                  <Rooms hospitalId={params.id} isAdmin={true} />
                 </TabPanel>
                 <TabPanel value={tab} index={2}>
                   <Users venue_id={hospital.id} />

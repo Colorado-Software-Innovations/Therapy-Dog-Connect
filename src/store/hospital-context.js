@@ -17,6 +17,8 @@ function HospitalContextProvider({ children }) {
     state: '',
     street: '',
     street2: '',
+    rooms: [],
+    volunteerTypes: [],
   });
   const [hospitals, setHospitals] = useState([]);
 
