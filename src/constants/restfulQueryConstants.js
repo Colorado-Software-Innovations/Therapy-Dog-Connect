@@ -12,6 +12,7 @@ export const UPDATE_ADDRESS = `${BASE_URL}/address/:id`;
  */
 export const FETCH_ROOM_BY_HOSPITAL_ID = `${BASE_URL}/room?venue_id=:id`;
 export const ADD_ROOM = `${BASE_URL}/room`;
+export const UPDATE_ROOM = `${BASE_URL}/room/:id`;
 
 /**
  * Visits Service
@@ -38,3 +39,10 @@ export const ADD_PERSON = `${BASE_URL}/user`;
 export const DELETE_PERSON = `${BASE_URL}/user/:id`;
 export const UPDATE_PERSON = `${BASE_URL}/user/:id`;
 export const GET_USERS_BY_VENUE_ID = `${BASE_URL}/user?venue_id=:id`;
+
+/**
+ * Volunteer Type Service
+ */
+export const ADD_VOLUNTEER_TYPE = `${BASE_URL}/volunteer-types`;
+export const FETCH_VOLUNTEER_TYPES = `${BASE_URL}/volunteer-types`;
+export const UPDATE_VOLUNTEER_TYPES = `${BASE_URL}/volunteer-types/:id`;

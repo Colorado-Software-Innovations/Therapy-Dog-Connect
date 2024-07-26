@@ -16,12 +16,13 @@ import VisitRequests from './VisitRequest';
 import BreadCrumb from '../../UI/BreadCrumb';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import RoomTable from './AddRoom';
+import Rooms from './Rooms';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
 import Users from '../Users';
+import VolunteerTypes from './VolunteerTypes';
 
 const Details = () => {
   const [hospital, setHospital] = useState(null);
@@ -198,6 +199,7 @@ const Details = () => {
                       <Tab label="Details" />
                       <Tab label="Rooms" />
                       <Tab label="Users" />
+                      <Tab label="Volunteer Types" />
                     </Tabs>
                   </Box>
                 </Grid>
@@ -243,10 +245,13 @@ const Details = () => {
                   </Grid>
                 </TabPanel>
                 <TabPanel value={tab} index={1}>
-                  <RoomTable hospitalId={params.id} isAdmin={true} />
+                  <Rooms hospitalId={params.id} isAdmin={true} />
                 </TabPanel>
                 <TabPanel value={tab} index={2}>
                   <Users venue_id={hospital.id} />
+                </TabPanel>
+                <TabPanel value={tab} index={3}>
+                  <VolunteerTypes />
                 </TabPanel>
               </Box>
             )}

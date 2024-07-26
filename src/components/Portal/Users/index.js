@@ -5,6 +5,7 @@ import useUsers from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
 import StatusCell from '../../UI/StatusCell';
 import { NotificationContext } from '../../../store/notification-context';
+import LoadingOverlay from '../../UI/LoadingOverlay';
 
 const Index = ({ venue_id }) => {
   const { getUserByVenueId } = useUsers();
@@ -16,7 +17,7 @@ const Index = ({ venue_id }) => {
   });
 
   const columns = [
-    { field: 'id', headerName: 'Id' },
+    { field: 'id', headerName: 'ID' },
     { field: 'role', headerName: 'Role' },
     { field: 'user', headerName: 'User' },
     {
@@ -63,6 +64,7 @@ const Index = ({ venue_id }) => {
   const handleRowClick = () => {};
   return (
     <div>
+      {usersState.isLoading && <LoadingOverlay />}
       <Grid container style={{ marginTop: 20 }}>
         <Grid item xs={12}>
           <DataGrid

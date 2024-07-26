@@ -1,6 +1,6 @@
+import { useCallback } from 'react';
 import axios from 'axios';
 import { ADD_VISIT, FETCH_VISIT_BY_HOSPITAL_ID } from '../../constants/restfulQueryConstants';
-import { useCallback } from 'react';
 
 function useVisits() {
   const addVisit = useCallback((payload) => {
