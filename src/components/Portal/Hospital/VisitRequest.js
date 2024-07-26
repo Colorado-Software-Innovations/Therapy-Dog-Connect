@@ -6,6 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
+import LoadingOverlay from '../../UI/LoadingOverlay';
 
 const VisitRequests = ({ hospitalId }) => {
   const [visitState, setVisitState] = useState({
@@ -40,6 +41,7 @@ const VisitRequests = ({ hospitalId }) => {
 
   return (
     <Box>
+    {visitState.isLoading && <LoadingOverlay />}
       <Grid item>
         {visitState.data.length > 0 && (
           <DataGrid
