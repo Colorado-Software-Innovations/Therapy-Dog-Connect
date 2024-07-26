@@ -265,6 +265,8 @@ const VolunteerTypes = () => {
                   paginationModel: { page: 0, pageSize: 10 },
                 },
               }}
+              disableSelectionOnClick
+              experimentalFeatures={{ newEditingApi: true }}
             />
           </Grid>
         </Grid>
