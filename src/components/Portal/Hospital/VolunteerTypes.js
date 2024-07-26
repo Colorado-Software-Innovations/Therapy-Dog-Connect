@@ -33,6 +33,8 @@ const VolunteerTypes = () => {
     } catch (error) {
       notificationCtx.show('error', `Failed to fetch volunteer types. ${error}`);
     }
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getVolunteerTypes, venue_id]);
 
   useEffect(() => {
