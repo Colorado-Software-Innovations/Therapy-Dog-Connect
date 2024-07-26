@@ -1,141 +1,274 @@
-import React, { useEffect, useCallback, useState, useContext } from 'react';
+import React, { useEffect, useCallback, useState, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
+import { Button, Grid, TextField, Select, MenuItem } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+
 import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
 import { NotificationContext } from '../../../store/notification-context';
-import { DataGrid } from '@mui/x-data-grid';
-import { Button, Grid } from '@mui/material';
-import Add from '@mui/icons-material/Add';
-import Cancel from '@mui/icons-material/Cancel';
 import LoadingOverlay from '../../UI/LoadingOverlay';
-
-const columns = [
-  { field: 'id', headerName: 'ID' },
-  { field: 'name', headerName: 'Volunteer Type', width: 250, editable: true },
-];
 
 const VolunteerTypes = () => {
   const notificationCtx = useContext(NotificationContext);
   const { getVolunteerTypes, updateVolunteerType, addVolunteerType } = useVolunteerTypes();
-  const params = useParams();
-  const venue_id = params.id;
-  const [isLoading, setIsLoading] = useState(true);
+  const { id: venue_id } = useParams();
+
   const [volunteerTypesState, setVolunteerTypesState] = useState({
     isLoading: true,
-    name: '',
     data: [],
   });
   const [isAddingNewRow, setIsAddingNewRow] = useState(false);
+  const [editRowId, setEditRowId] = useState(null);
+  const [rowValues, setRowValues] = useState({});
+  const hasFetched = useRef(false);
 
   const fetchVolunteerTypes = useCallback(async () => {
-    setIsLoading(true);
+    setVolunteerTypesState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const response = await getVolunteerTypes(params.id);
-      setVolunteerTypesState((prev) => ({
-        ...prev,
-        isLoading: false,
-        data: response,
-      }));
+      const response = await getVolunteerTypes(venue_id);
+      setVolunteerTypesState({ isLoading: false, data: response });
     } catch (error) {
       notificationCtx.show('error', `Failed to fetch volunteer types. ${error}`);
-    } finally {
-      setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getVolunteerTypes, venue_id]);
 
   useEffect(() => {
-    fetchVolunteerTypes();
+    if (!hasFetched.current) {
+      fetchVolunteerTypes();
+      hasFetched.current = true;
+    }
   }, [fetchVolunteerTypes]);
 
-  const handleRowClick = () => {};
-
-  const processRowUpdate = async (newRow) => {
-    if (newRow.id === 'new') {
+  const processRowUpdate = useCallback(
+    async (newRow) => {
       try {
-        await addVolunteerType({ venue_id, name: newRow.name });
-        notificationCtx.show('success', 'Volunteer type added successfully.');
+        if (newRow.id === 'new') {
+          await addVolunteerType({
+            venue_id,
+            name: newRow.name,
+            require_patient: newRow.require_patient,
+          });
+          notificationCtx.show('success', 'Volunteer type added successfully.');
+        } else {
+          await updateVolunteerType(newRow.id, {
+            name: newRow.name,
+            require_patient: newRow.require_patient,
+          });
+          notificationCtx.show('success', 'Volunteer type updated successfully.');
+        }
         setIsAddingNewRow(false);
-        fetchVolunteerTypes(); // Refresh data after adding
+        setEditRowId(null);
+        fetchVolunteerTypes();
       } catch (error) {
-        notificationCtx.show('error', `Failed to add volunteer type. ${error}`);
+        notificationCtx.show(
+          'error',
+          `Failed to ${newRow.id === 'new' ? 'add' : 'update'} volunteer type. ${error}`,
+        );
       }
-    } else {
-      try {
-        await updateVolunteerType(newRow.id, { name: newRow.name });
-        notificationCtx.show('success', 'Volunteer type updated successfully.');
-      } catch (error) {
-        notificationCtx.show('error', `Failed to update volunteer type. ${error}`);
-      }
-    }
-    return newRow;
-  };
+      return newRow;
+    },
+    [addVolunteerType, updateVolunteerType, venue_id, fetchVolunteerTypes, notificationCtx],
+  );
 
   const handleProcessRowUpdateError = (error) => {
     notificationCtx.show('error', `Update failed: ${error.message}`);
   };
 
   const handleAddRow = () => {
-    if (!isAddingNewRow) {
-      setIsAddingNewRow(true);
-      const id = 'new';
-      setVolunteerTypesState((prev) => ({
-        ...prev,
-        data: [{ id, name: '' }, ...prev.data],
-      }));
-    }
+    setIsAddingNewRow(true);
+    setEditRowId('new');
+    setRowValues({ new: { name: '', require_patient: 0 } });
+    setVolunteerTypesState((prev) => ({
+      ...prev,
+      data: [{ id: 'new', name: '', require_patient: 0 }, ...prev.data],
+    }));
   };
 
   const handleCancelAddRow = () => {
-    if (isAddingNewRow) {
-      setVolunteerTypesState((prev) => ({
-        ...prev,
-        data: prev.data.filter((row) => row.id !== 'new'),
-      }));
-      setIsAddingNewRow(false);
+    setIsAddingNewRow(false);
+    setEditRowId(null);
+    setRowValues({});
+    setVolunteerTypesState((prev) => ({
+      ...prev,
+      data: prev.data.filter((row) => row.id !== 'new'),
+    }));
+  };
+
+  const handleDeleteRow = async (id) => {
+    try {
+      await updateVolunteerType(id, { id, is_deleted: true });
+      notificationCtx.show('success', 'Volunteer type deleted successfully.');
+      fetchVolunteerTypes();
+    } catch (error) {
+      notificationCtx.show('error', `Failed to delete volunteer type. ${error}`);
     }
   };
 
+  const handleEditClick = (id) => {
+    const row = volunteerTypesState.data.find((row) => row.id === id);
+    if (row) {
+      setEditRowId(id);
+      setRowValues((prev) => ({ ...prev, [id]: row }));
+    }
+  };
+
+  const handleCancelClick = () => {
+    setEditRowId(null);
+    setRowValues({});
+  };
+
+  const handleEditCellChange = (params) => {
+    setRowValues((prev) => ({
+      ...prev,
+      [params.id]: { ...prev[params.id], [params.field]: params.value },
+    }));
+  };
+
+  const renderEditSelectCell = (params) => {
+    return (
+      <Select
+        value={rowValues[params.id]?.require_patient ?? params.value}
+        onChange={(e) =>
+          handleEditCellChange({ id: params.id, field: 'require_patient', value: e.target.value })
+        }
+        variant="standard"
+        size="small"
+      >
+        <MenuItem value={1}>Yes</MenuItem>
+        <MenuItem value={0}>No</MenuItem>
+      </Select>
+    );
+  };
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 50 },
+    {
+      field: 'name',
+      headerName: 'Volunteer Type',
+      width: 150,
+      editable: true,
+      renderCell: (params) =>
+        editRowId === params.id ? (
+          <TextField
+            value={rowValues[params.id]?.name ?? params.value}
+            onChange={(e) =>
+              handleEditCellChange({ id: params.id, field: 'name', value: e.target.value })
+            }
+            variant="standard"
+            size="small"
+          />
+        ) : (
+          params.value
+        ),
+    },
+    {
+      field: 'require_patient',
+      headerName: 'Requires Patient',
+      width: 150,
+      editable: true,
+      renderEditCell: renderEditSelectCell,
+      renderCell: (params) =>
+        editRowId === params.id ? (
+          renderEditSelectCell(params)
+        ) : (
+          <span>{params.value === 1 ? 'Yes' : 'No'}</span>
+        ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      type: 'actions',
+      getActions: (params) => {
+        if (editRowId === params.id || (isAddingNewRow && params.id === 'new')) {
+          return [
+            <GridActionsCellItem
+              icon={<CloseIcon />}
+              label="Cancel"
+              onClick={editRowId === 'new' ? handleCancelAddRow : handleCancelClick}
+              key="cancel"
+            />,
+          ];
+        }
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={() => handleEditClick(params.id)}
+            key="edit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteRow(params.id)}
+            key="delete"
+          />,
+        ];
+      },
+    },
+  ];
+
+  const handleRowEditStop = async (params) => {
+    const updatedRow = {
+      ...params.row,
+      ...rowValues[params.row.id],
+    };
+    await processRowUpdate(updatedRow);
+  };
+
+  const [editRowsModel, setEditRowsModel] = useState({});
+
+  useEffect(() => {
+    if (editRowId) {
+      setEditRowsModel((prev) => ({
+        ...prev,
+        [editRowId]: {
+          name: { value: rowValues[editRowId]?.name },
+          require_patient: { value: rowValues[editRowId]?.require_patient },
+        },
+      }));
+    }
+  }, [editRowId, rowValues]);
+
   return (
     <div>
-      {isLoading && <LoadingOverlay />}
-      <Grid container style={{ marginTop: 20 }}>
-        <Button
-          onClick={handleAddRow}
-          style={{ marginBottom: 10, marginRight: 10 }}
-          variant="contained"
-          startIcon={<Add />}
-          disabled={isAddingNewRow}
-        >
-          Add Volunteer Type
-        </Button>
-        {isAddingNewRow && (
+      {volunteerTypesState.isLoading ? (
+        <LoadingOverlay />
+      ) : (
+        <Grid container style={{ marginTop: 20 }}>
           <Button
-            onClick={handleCancelAddRow}
-            style={{ marginBottom: 10 }}
+            onClick={handleAddRow}
+            style={{ marginBottom: 10, marginRight: 10 }}
             variant="contained"
-            startIcon={<Cancel />}
-            color="secondary"
+            startIcon={<Add />}
+            disabled={isAddingNewRow}
           >
-            Cancel
+            Add Volunteer Type
           </Button>
-        )}
-        <Grid item xs={12}>
-          <DataGrid
-            onRowClick={handleRowClick}
-            rows={volunteerTypesState.data}
-            columns={columns}
-            density="compact"
-            processRowUpdate={processRowUpdate}
-            onProcessRowUpdateError={handleProcessRowUpdateError}
-            pageSizeOptions={[25, 50, 100]}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 10 },
-              },
-            }}
-          />
+          <Grid item xs={12}>
+            <DataGrid
+              rows={volunteerTypesState.data}
+              columns={columns}
+              editMode="row"
+              density="compact"
+              processRowUpdate={processRowUpdate}
+              onProcessRowUpdateError={handleProcessRowUpdateError}
+              onRowEditStop={handleRowEditStop}
+              editRowsModel={editRowsModel}
+              onEditRowsModelChange={setEditRowsModel}
+              pageSizeOptions={[25, 50, 100]}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 10 },
+                },
+              }}
+            />
+          </Grid>
         </Grid>
-      </Grid>
+      )}
     </div>
   );
 };

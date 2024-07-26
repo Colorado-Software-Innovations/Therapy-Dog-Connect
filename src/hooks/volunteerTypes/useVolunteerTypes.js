@@ -9,7 +9,7 @@ import {
 function useVolunteerTypes() {
   const getVolunteerTypes = useCallback((venue_id) => {
     return axios
-      .get(`${FETCH_VOLUNTEER_TYPES}?venue_id=${venue_id}`)
+      .get(`${FETCH_VOLUNTEER_TYPES}?venue_id=${venue_id}&is_deleted=0`)
       .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => err);
   }, []);

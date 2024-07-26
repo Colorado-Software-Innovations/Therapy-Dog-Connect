@@ -9,19 +9,15 @@ import LoadingOverlay from '../../UI/LoadingOverlay';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function Rooms({ hospitalId }) {
   const [isAddingNewRow, setIsAddingNewRow] = useState(false);
-  const [roomState, setRoomState] = useState({
-    isLoading: true,
-    data: [],
-  });
+  const [roomState, setRoomState] = useState({ isLoading: true, data: [] });
   const [editRowId, setEditRowId] = useState(null);
   const [editRowValue, setEditRowValue] = useState('');
   const [newRowValue, setNewRowValue] = useState('');
-  const [isCellEditing, setIsCellEditing] = useState(false);
+
   const notificationCtx = useContext(NotificationContext);
   const hospitalCtx = useContext(HospitalContext);
   const params = useParams();
@@ -33,10 +29,7 @@ export default function Rooms({ hospitalId }) {
       if (forceFetch || !hospitalCtx.selectedHospital?.rooms) {
         try {
           const response = await fetchRoomsByHospitalId(params.id);
-          setRoomState({
-            isLoading: false,
-            data: response || [],
-          });
+          setRoomState({ isLoading: false, data: response || [] });
           hospitalCtx.setSelectedHospital((prev) => ({
             ...prev,
             rooms: response || [],
@@ -45,10 +38,7 @@ export default function Rooms({ hospitalId }) {
           notificationCtx.show('error', `Failed to fetch room numbers. ${error}`);
         }
       } else {
-        setRoomState({
-          isLoading: false,
-          data: hospitalCtx.selectedHospital.rooms,
-        });
+        setRoomState({ isLoading: false, data: hospitalCtx.selectedHospital.rooms });
       }
     },
     [fetchRoomsByHospitalId, params.id, notificationCtx, hospitalCtx],
@@ -62,23 +52,21 @@ export default function Rooms({ hospitalId }) {
   }, [fetchRooms]);
 
   const processRowUpdate = async (newRow) => {
-    if (newRow.id === 'new') {
-      try {
+    try {
+      if (newRow.id === 'new') {
         await addRoom({ venue_id: hospitalId, number: newRow.number });
         notificationCtx.show('success', 'Room added successfully.');
-        setIsAddingNewRow(false);
-        fetchRooms(true); // Force fetch data after adding
-      } catch (error) {
-        notificationCtx.show('error', `Failed to add room. ${error}`);
-      }
-    } else {
-      try {
+      } else {
         await updateRoom(newRow.id, newRow);
         notificationCtx.show('success', 'Room updated successfully.');
-        fetchRooms(true); // Force fetch data after updating
-      } catch (error) {
-        notificationCtx.show('error', `Failed to update room. ${error}`);
       }
+      setIsAddingNewRow(false);
+      fetchRooms(true); // Force fetch data after adding or updating
+    } catch (error) {
+      notificationCtx.show(
+        'error',
+        `Failed to ${newRow.id === 'new' ? 'add' : 'update'} room. ${error}`,
+      );
     }
     return newRow;
   };
@@ -90,12 +78,11 @@ export default function Rooms({ hospitalId }) {
   const handleAddRow = () => {
     if (!isAddingNewRow) {
       setIsAddingNewRow(true);
-      const id = 'new';
       setRoomState((prev) => ({
         ...prev,
-        data: [{ id, number: '' }, ...prev.data],
+        data: [{ id: 'new', number: '' }, ...prev.data],
       }));
-      setEditRowId(id);
+      setEditRowId('new');
       setNewRowValue('');
     }
   };
@@ -128,17 +115,6 @@ export default function Rooms({ hospitalId }) {
     }
   };
 
-  const handleSaveClick = async () => {
-    const updatedRow =
-      editRowId === 'new'
-        ? { id: 'new', number: newRowValue }
-        : { id: editRowId, number: editRowValue };
-    await processRowUpdate(updatedRow);
-    setEditRowId(null);
-    setEditRowValue('');
-    setNewRowValue('');
-  };
-
   const handleCancelClick = () => {
     setEditRowId(null);
     setEditRowValue('');
@@ -147,18 +123,10 @@ export default function Rooms({ hospitalId }) {
 
   const handleEditCellChange = (params) => {
     if (params.id === 'new') {
-      setNewRowValue(params.props.value);
+      setNewRowValue(params.value);
     } else {
-      setEditRowValue(params.props.value);
+      setEditRowValue(params.value);
     }
-  };
-
-  const handleEditCellStart = () => {
-    setIsCellEditing(true);
-  };
-
-  const handleEditCellStop = () => {
-    setIsCellEditing(false);
   };
 
   const columns = [
@@ -168,23 +136,19 @@ export default function Rooms({ hospitalId }) {
       headerName: 'Room Number',
       width: 200,
       editable: true,
-      renderCell: (params) => {
-        if (editRowId === params.id) {
-          return (
-            <TextField
-              value={editRowId === 'new' ? newRowValue : editRowValue}
-              onChange={(e) =>
-                editRowId === 'new'
-                  ? setNewRowValue(e.target.value)
-                  : setEditRowValue(e.target.value)
-              }
-              variant="standard"
-              size="small"
-            />
-          );
-        }
-        return <span>{params.value}</span>;
-      },
+      renderCell: (params) =>
+        editRowId === params.id ? (
+          <TextField
+            value={editRowId === 'new' ? newRowValue : editRowValue}
+            onChange={(e) =>
+              editRowId === 'new' ? setNewRowValue(e.target.value) : setEditRowValue(e.target.value)
+            }
+            variant="standard"
+            size="small"
+          />
+        ) : (
+          <span>{params.value}</span>
+        ),
     },
     {
       field: 'actions',
@@ -192,29 +156,12 @@ export default function Rooms({ hospitalId }) {
       width: 150,
       type: 'actions',
       getActions: (params) => {
-        if (isAddingNewRow && params.id === 'new') {
+        if (editRowId === params.id || (isAddingNewRow && params.id === 'new')) {
           return [
             <GridActionsCellItem
               icon={<CloseIcon />}
               label="Cancel"
-              onClick={handleCancelAddRow}
-              key="cancel"
-            />,
-          ];
-        }
-        if (editRowId === params.id) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              onClick={handleSaveClick}
-              key="save"
-              disabled={isCellEditing}
-            />,
-            <GridActionsCellItem
-              icon={<CloseIcon />}
-              label="Cancel"
-              onClick={handleCancelClick}
+              onClick={editRowId === 'new' ? handleCancelAddRow : handleCancelClick}
               key="cancel"
             />,
           ];
@@ -259,8 +206,6 @@ export default function Rooms({ hospitalId }) {
             processRowUpdate={processRowUpdate}
             onProcessRowUpdateError={handleProcessRowUpdateError}
             onEditCellChange={handleEditCellChange}
-            onCellEditStart={handleEditCellStart}
-            onCellEditStop={handleEditCellStop}
             pageSizeOptions={[25, 50, 100]}
             initialState={{
               pagination: {
