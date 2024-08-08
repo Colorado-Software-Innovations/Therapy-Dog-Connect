@@ -5,6 +5,7 @@ import { Button, Grid, TextField, Select, MenuItem } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 
 import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
@@ -33,9 +34,7 @@ const VolunteerTypes = () => {
     } catch (error) {
       notificationCtx.show('error', `Failed to fetch volunteer types. ${error}`);
     }
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getVolunteerTypes, venue_id]);
+  }, [getVolunteerTypes, venue_id, notificationCtx]);
 
   useEffect(() => {
     if (!hasFetched.current) {
@@ -151,7 +150,7 @@ const VolunteerTypes = () => {
       field: 'name',
       headerName: 'Volunteer Type',
       width: 150,
-      editable: true,
+      editable: false,
       renderCell: (params) =>
         editRowId === params.id ? (
           <TextField
@@ -170,7 +169,7 @@ const VolunteerTypes = () => {
       field: 'require_patient',
       headerName: 'Requires Patient',
       width: 150,
-      editable: true,
+      editable: false,
       renderEditCell: renderEditSelectCell,
       renderCell: (params) =>
         editRowId === params.id ? (
@@ -187,6 +186,12 @@ const VolunteerTypes = () => {
       getActions: (params) => {
         if (editRowId === params.id || (isAddingNewRow && params.id === 'new')) {
           return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={() => processRowUpdate({ ...params.row, ...rowValues[params.id] })}
+              key="save"
+            />,
             <GridActionsCellItem
               icon={<CloseIcon />}
               label="Cancel"
@@ -213,28 +218,6 @@ const VolunteerTypes = () => {
     },
   ];
 
-  const handleRowEditStop = async (params) => {
-    const updatedRow = {
-      ...params.row,
-      ...rowValues[params.row.id],
-    };
-    await processRowUpdate(updatedRow);
-  };
-
-  const [editRowsModel, setEditRowsModel] = useState({});
-
-  useEffect(() => {
-    if (editRowId) {
-      setEditRowsModel((prev) => ({
-        ...prev,
-        [editRowId]: {
-          name: { value: rowValues[editRowId]?.name },
-          require_patient: { value: rowValues[editRowId]?.require_patient },
-        },
-      }));
-    }
-  }, [editRowId, rowValues]);
-
   return (
     <div>
       {volunteerTypesState.isLoading ? (
@@ -258,9 +241,8 @@ const VolunteerTypes = () => {
               density="compact"
               processRowUpdate={processRowUpdate}
               onProcessRowUpdateError={handleProcessRowUpdateError}
-              onRowEditStop={handleRowEditStop}
-              editRowsModel={editRowsModel}
-              onEditRowsModelChange={setEditRowsModel}
+              editRowsModel={rowValues}
+              onEditRowsModelChange={setRowValues}
               pageSizeOptions={[25, 50, 100]}
               initialState={{
                 pagination: {

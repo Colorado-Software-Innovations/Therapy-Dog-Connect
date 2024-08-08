@@ -9,6 +9,7 @@ import LoadingOverlay from '../../UI/LoadingOverlay';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function Rooms({ hospitalId }) {
@@ -22,7 +23,7 @@ export default function Rooms({ hospitalId }) {
   const hospitalCtx = useContext(HospitalContext);
   const params = useParams();
   const { addRoom, fetchRoomsByHospitalId, updateRoom } = useRooms();
-  const hasFetched = useRef(false); // To prevent fetching rooms multiple times on initial load
+  const hasFetched = useRef(false);
 
   const fetchRooms = useCallback(
     async (forceFetch = false) => {
@@ -46,7 +47,7 @@ export default function Rooms({ hospitalId }) {
 
   useEffect(() => {
     if (!hasFetched.current) {
-      fetchRooms(true); // Force fetch on first load
+      fetchRooms(true);
       hasFetched.current = true;
     }
   }, [fetchRooms]);
@@ -61,7 +62,8 @@ export default function Rooms({ hospitalId }) {
         notificationCtx.show('success', 'Room updated successfully.');
       }
       setIsAddingNewRow(false);
-      fetchRooms(true); // Force fetch data after adding or updating
+      setEditRowId(null);
+      fetchRooms(true);
     } catch (error) {
       notificationCtx.show(
         'error',
@@ -101,7 +103,7 @@ export default function Rooms({ hospitalId }) {
     try {
       await updateRoom(id, { id, is_deleted: true });
       notificationCtx.show('success', 'Room deleted successfully.');
-      fetchRooms(true); // Force fetch data after deleting
+      fetchRooms(true);
     } catch (error) {
       notificationCtx.show('error', `Failed to delete room. ${error}`);
     }
@@ -135,13 +137,13 @@ export default function Rooms({ hospitalId }) {
       field: 'number',
       headerName: 'Room Number',
       width: 200,
-      editable: true,
+      editable: false,
       renderCell: (params) =>
         editRowId === params.id ? (
           <TextField
             value={editRowId === 'new' ? newRowValue : editRowValue}
             onChange={(e) =>
-              editRowId === 'new' ? setNewRowValue(e.target.value) : setEditRowValue(e.target.value)
+              handleEditCellChange({ id: params.id, field: 'number', value: e.target.value })
             }
             variant="standard"
             size="small"
@@ -158,6 +160,17 @@ export default function Rooms({ hospitalId }) {
       getActions: (params) => {
         if (editRowId === params.id || (isAddingNewRow && params.id === 'new')) {
           return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={() =>
+                processRowUpdate({
+                  ...params.row,
+                  number: editRowId === 'new' ? newRowValue : editRowValue,
+                })
+              }
+              key="save"
+            />,
             <GridActionsCellItem
               icon={<CloseIcon />}
               label="Cancel"
@@ -205,7 +218,6 @@ export default function Rooms({ hospitalId }) {
             density="compact"
             processRowUpdate={processRowUpdate}
             onProcessRowUpdateError={handleProcessRowUpdateError}
-            onEditCellChange={handleEditCellChange}
             pageSizeOptions={[25, 50, 100]}
             initialState={{
               pagination: {
