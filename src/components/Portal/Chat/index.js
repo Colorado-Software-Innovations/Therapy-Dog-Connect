@@ -30,7 +30,7 @@ const getInitials = (name) =>
     .join('')
     .toUpperCase();
 
-const ChatUI = ({ drawerWidth }) => {
+const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
   const [selectedContact, setSelectedContact] = useState(contacts[0]);
   const [messages, setMessages] = useState(
     mockMessages[selectedContact.first + ' ' + selectedContact.last] || [],
@@ -49,11 +49,12 @@ const ChatUI = ({ drawerWidth }) => {
 
   const handleSendMessage = (newMessage) => {
     if (newMessage.trim()) {
-      setMessages((prevMessages) => [...prevMessages, { sender: 'You', content: newMessage }]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: 'You', content: newMessage, timestamp: Date.now() },
+      ]);
     }
   };
-
-  //const fullName = `${selectedContact.first} ${selectedContact.last}`;
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -64,7 +65,7 @@ const ChatUI = ({ drawerWidth }) => {
           borderRight: 1,
           borderColor: 'divider',
           bgcolor: 'background.paper',
-          overflowY: 'auto',
+          overflow: 'hidden',
           transition: 'width 0.3s',
         }}
       >
@@ -88,21 +89,24 @@ const ChatUI = ({ drawerWidth }) => {
         </List>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, height: '100%' }}>
-        <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto', padding: 2 }}>
           <Messages messages={messages} />
           <Box ref={messagesEndRef} />
         </Box>
-        <Box
-          sx={{
-            borderTop: 1,
-            borderColor: 'divider',
-            boxSizing: 'border-box',
-            padding: '8px 16px',
-          }}
-        >
-        </Box>
-        <MessageInput onSend={handleSendMessage} />
+        <MessageInput
+          onSend={handleSendMessage}
+          drawerWidth={drawerWidth}
+          isDrawerOpen={isDrawerOpen}
+        />
       </Box>
     </Box>
   );
