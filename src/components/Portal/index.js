@@ -20,6 +20,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import List from '@mui/material/List';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import SettingsIcon from '@mui/icons-material/Settings';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -66,7 +67,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
   justifyContent: 'flex-end',
 }));
@@ -77,6 +77,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -161,32 +162,44 @@ export default function Admin() {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <List>
-          <ListItemButton component={RouterLink} to="hospitals">
-            <Tooltip title="Hospitals">
+        <Box sx={{ flexGrow: 1 }}>
+          <List>
+            <ListItemButton component={RouterLink} to="hospitals">
+              <Tooltip title="Hospitals">
+                <ListItemIcon>
+                  <LocalHospitalIcon />
+                </ListItemIcon>
+              </Tooltip>
+              <ListItemText primary="Hospitals" />
+            </ListItemButton>
+            <ListItemButton component={RouterLink} to="chat">
+              <Tooltip title="Chat">
+                <ListItemIcon>
+                  <ChatIcon />
+                </ListItemIcon>
+              </Tooltip>
+              <ListItemText primary="Chat" />
+            </ListItemButton>
+            <ListItemButton component={RouterLink} to="hospitals/49">
+              <Tooltip title="My Hospital">
+                <ListItemIcon>
+                  <DomainAddIcon />
+                </ListItemIcon>
+              </Tooltip>
+              <ListItemText primary="My Hospital" />
+            </ListItemButton>
+          </List>
+        </Box>
+        <Box>
+          <ListItemButton component={RouterLink} to="settings">
+            <Tooltip title="Settings">
               <ListItemIcon>
-                <LocalHospitalIcon />
+                <SettingsIcon />
               </ListItemIcon>
             </Tooltip>
-            <ListItemText primary="Hospitals" />
+            <ListItemText primary="Settings" />
           </ListItemButton>
-          <ListItemButton component={RouterLink} to="chat">
-            <Tooltip title="Chat">
-              <ListItemIcon>
-                <ChatIcon />
-              </ListItemIcon>
-            </Tooltip>
-            <ListItemText primary="Chat" />
-          </ListItemButton>
-          <ListItemButton component={RouterLink} to="hospitals/49">
-            <Tooltip title="My Hospital">
-              <ListItemIcon>
-                <DomainAddIcon />
-              </ListItemIcon>
-            </Tooltip>
-            <ListItemText primary="My Hospital" />
-          </ListItemButton>
-        </List>
+        </Box>
       </Drawer>
       <Main open={open}>
         <Outlet />

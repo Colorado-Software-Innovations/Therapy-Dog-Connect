@@ -15,6 +15,7 @@ import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
 import Details from './components/Portal/Hospital/Detail';
+import Settings from './components/Portal/Settings';
 // eslint-disable-next-line
 import config from './amplifyconfiguration.json';
 import SnackbarAlert from './components/UI/SnackBarAlert';
@@ -53,6 +54,7 @@ function App() {
               }
             />
             <Route path="chat" element={<Chat />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         )}
       </Routes>
