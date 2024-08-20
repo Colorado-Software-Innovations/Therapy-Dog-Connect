@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import AWS from 'aws-sdk';
 import {
   Modal,
   Box,
@@ -13,6 +14,14 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAdd from '@mui/icons-material/PersonAdd';
+import { NotificationContext } from '../../../store/notification-context';
+import useUser from '../../../hooks/users/useUsers';
+
+const cognito = new AWS.CognitoIdentityServiceProvider({
+  region: 'us-east-1', // Your region
+  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+});
 
 // Helper function to validate email format
 const validateEmail = (email) => {
@@ -42,7 +51,8 @@ const validatePhoneNumber = (phone) => {
   return e164Regex.test(phone);
 };
 
-export default function UserFormModal() {
+export default function UserFormModal({ venueId }) {
+  const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState(false);
   const [userType, setUserType] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -52,10 +62,12 @@ export default function UserFormModal() {
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
 
+  const { addPerson } = useUser();
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
@@ -76,7 +88,42 @@ export default function UserFormModal() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log({ userType, firstName, lastName, email, phone });
+      const newUser = { userType, firstName, lastName, email, phone };
+      if (newUser.userType === 'Admin') {
+        const params = {
+          UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ADMIN, // User pool ID
+          Username: email,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: email,
+            },
+            {
+              Name: 'phone_number',
+              Value: phone,
+            },
+          ],
+          DesiredDeliveryMediums: ['EMAIL'], // Send the invite via email
+        };
+        try {
+          const result = await cognito.adminCreateUser(params).promise();
+          if (result?.User?.Username) {
+            const payload = {
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              phone: phone,
+              role: userType,
+              venue_id: venueId,
+            };
+            const result = await addPerson(payload);
+            console.log(result);
+          }
+          notificationCtx.show('success', `User Invite sent to: ${email}`);
+        } catch (error) {
+          notificationCtx.show('error', `Failed to send User Invite. ${error}`);
+        }
+      }
       handleClose();
     }
   };

@@ -6,7 +6,6 @@ import { Promise } from 'bluebird';
 import StatusCell from '../../UI/StatusCell';
 import { NotificationContext } from '../../../store/notification-context';
 import LoadingOverlay from '../../UI/LoadingOverlay';
-
 import UserFormModal from './NewUserModal';
 
 const Index = ({ venue_id }) => {
@@ -68,7 +67,7 @@ const Index = ({ venue_id }) => {
   return (
     <div>
       {usersState.isLoading && <LoadingOverlay />}
-      <UserFormModal />
+      <UserFormModal venueId={venue_id}/>
       <Grid container style={{ marginTop: 20 }}>
         <Grid item xs={12}>
           <DataGrid

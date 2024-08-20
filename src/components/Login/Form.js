@@ -16,7 +16,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CopyRight from '../UI/CopyRight';
 import validateEmail from '../../utils/EmailValidation.js';
 
-const LoginForm = ({ handleLogin, toggle, error, forgotPassword }) => {
+const LoginForm = ({ handleLogin, error, forgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -119,13 +119,6 @@ const LoginForm = ({ handleLogin, toggle, error, forgotPassword }) => {
           <Grid item xs>
             <Button onClick={forgotPassword} style={styles.button}>
               Forgot Password?
-            </Button>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs>
-            <Button style={styles.button} onClick={toggle}>
-              Sign Up
             </Button>
           </Grid>
         </Grid>
