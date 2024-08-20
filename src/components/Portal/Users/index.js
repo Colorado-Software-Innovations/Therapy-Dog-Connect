@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Grid } from '@mui/material';
+import { Grid,  } from '@mui/material';
 import useUsers from '../../../hooks/users/useUsers';
 import { Promise } from 'bluebird';
 import StatusCell from '../../UI/StatusCell';
 import { NotificationContext } from '../../../store/notification-context';
 import LoadingOverlay from '../../UI/LoadingOverlay';
+
+import UserFormModal from './NewUserModal';
 
 const Index = ({ venue_id }) => {
   const { getUserByVenueId } = useUsers();
@@ -62,9 +64,11 @@ const Index = ({ venue_id }) => {
   }, []);
 
   const handleRowClick = () => {};
+
   return (
     <div>
       {usersState.isLoading && <LoadingOverlay />}
+      <UserFormModal />
       <Grid container style={{ marginTop: 20 }}>
         <Grid item xs={12}>
           <DataGrid
