@@ -8,6 +8,8 @@ import {
   CircularProgress,
   FormHelperText,
 } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import { Password as PasswordIcon } from '@mui/icons-material';
 import { confirmSignIn } from '@aws-amplify/auth';
 import { AuthContext } from '../../store/auth-context';
 
@@ -37,9 +39,9 @@ function ConfirmSignInWithNewPassword({ user }) {
         challengeResponse: newPassword,
       });
 
-      if (authenticatedUser.isSignedIn) {
-        authCtx.isSignedIn = authenticatedUser.isSignedIn;
-        navigate('/admin');
+      authCtx.isLoggedIn = authenticatedUser.isSignedIn;
+      if (authCtx.isLoggedIn) {
+        navigate(`/admin`);
       }
     } catch (err) {
       setError(err.message || 'Failed to set the new password');
@@ -51,18 +53,16 @@ function ConfirmSignInWithNewPassword({ user }) {
   return (
     <Box
       sx={{
-        width: 400,
-        margin: 'auto',
+        my: 8,
+        mx: 4,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
         alignItems: 'center',
-        padding: 4,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 2,
       }}
     >
+      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+        <PasswordIcon />
+      </Avatar>
       <Typography variant="h5" component="h1" gutterBottom>
         Set New Password
       </Typography>

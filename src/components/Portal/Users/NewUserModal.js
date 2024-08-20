@@ -102,6 +102,18 @@ export default function UserFormModal({ venueId }) {
               Name: 'phone_number',
               Value: phone,
             },
+            {
+              Name: 'family_name',
+              Value: lastName,
+            },
+            {
+              Name: 'given_name',
+              Value: firstName,
+            },
+            {
+              Name: 'custom:venueId',
+              Value: `${venueId}`,
+            },
           ],
           DesiredDeliveryMediums: ['EMAIL'], // Send the invite via email
         };
@@ -109,15 +121,16 @@ export default function UserFormModal({ venueId }) {
           const result = await cognito.adminCreateUser(params).promise();
           if (result?.User?.Username) {
             const payload = {
-              first_name: firstName,
-              last_name: lastName,
+              auth_user_id: result.User.Username,
               email: email,
+              first_name: firstName,
+              is_active: false,
+              last_name: lastName,
               phone: phone,
               role: userType,
               venue_id: venueId,
             };
-            const result = await addPerson(payload);
-            console.log(result);
+            await addPerson(payload);
           }
           notificationCtx.show('success', `User Invite sent to: ${email}`);
         } catch (error) {
@@ -127,7 +140,6 @@ export default function UserFormModal({ venueId }) {
       handleClose();
     }
   };
-
   const handlePhoneChange = (e) => {
     const formattedPhone = formatPhoneNumber(e.target.value);
     setPhone(formattedPhone);
@@ -145,7 +157,7 @@ export default function UserFormModal({ venueId }) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            width: 500,
             bgcolor: 'background.paper',
             boxShadow: 24,
             p: 4,
