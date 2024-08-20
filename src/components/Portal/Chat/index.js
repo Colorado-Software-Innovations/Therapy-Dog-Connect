@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Box } from '@mui/material';
-import Messages from './Messages';
-import MessageInput from './MessageInput';
+import { List, ListItem, ListItemText, Box } from '@mui/material';
+// import Messages from './Messages';
+// import MessageInput from './MessageInput';
 
 const contacts = [
   { first: 'Zach', last: 'Cervi', volunteerType: 'Dog Handler' },
@@ -23,19 +23,47 @@ const mockMessages = {
   // Add more mock conversations...
 };
 
-const getInitials = (name) =>
-  name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
+// const getInitials = (name) =>
+//   name
+//     .split(' ')
+//     .map((n) => n[0])
+//     .join('')
+//     .toUpperCase();
 
 const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
+  console.log('isdrawerOpen', isDrawerOpen);
   const [selectedContact, setSelectedContact] = useState(contacts[0]);
   const [messages, setMessages] = useState(
     mockMessages[selectedContact.first + ' ' + selectedContact.last] || [],
   );
   const messagesEndRef = useRef(null);
+  let socket;
+  useEffect(() => {
+    socket = new WebSocket('wss://48m7d7by9a.execute-api.us-east-1.amazonaws.com/dev');
+
+    // Once the connection is established, send the recipientId
+    socket.onopen = () => {
+      console.log('WebSocket connection opened');
+      socket.send(JSON.stringify({ action: 'retrieveMessages', recipientId: 22 }));
+    };
+
+    // Listen for messages
+    socket.onmessage = (event) => {
+      const newMessage = JSON.parse(event.data);
+      console.log('newMessage', newMessage);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    };
+
+    // Handle WebSocket errors
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Clean up WebSocket connection on component unmount
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   useEffect(() => {
     // Scroll to the bottom of the messages when new messages are added
@@ -47,6 +75,7 @@ const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
     setMessages(mockMessages[contact.first + ' ' + contact.last] || []);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleSendMessage = (newMessage) => {
     if (newMessage.trim()) {
       setMessages((prevMessages) => [
@@ -77,9 +106,6 @@ const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
               onClick={() => handleContactClick(contact)}
               sx={{ padding: '10px 20px', borderBottom: 1, borderColor: 'divider' }}
             >
-              <ListItemAvatar>
-                <Avatar>{getInitials(`${contact.first} ${contact.last}`)}</Avatar>
-              </ListItemAvatar>
               <ListItemText
                 primary={`${contact.first} ${contact.last}`}
                 secondary={contact.volunteerType}
@@ -97,17 +123,7 @@ const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
           height: '100%',
           overflow: 'hidden',
         }}
-      >
-        <Box sx={{ flexGrow: 1, overflow: 'auto', padding: 2 }}>
-          <Messages messages={messages} />
-          <Box ref={messagesEndRef} />
-        </Box>
-        <MessageInput
-          onSend={handleSendMessage}
-          drawerWidth={drawerWidth}
-          isDrawerOpen={isDrawerOpen}
-        />
-      </Box>
+      ></Box>
     </Box>
   );
 };
