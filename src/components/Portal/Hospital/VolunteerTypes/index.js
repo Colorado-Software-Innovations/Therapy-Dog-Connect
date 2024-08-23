@@ -22,7 +22,7 @@ export default function VolunteerTypes({ data, venueId, fetchVolunteerTypes }) {
     if (id === 'new') {
       await addVolunteerType({
         venue_id: venueId,
-        name: rowValues[id].name.trim(), // Ensure leading/trailing spaces are handled
+        name: rowValues[id].name.trim(),
         require_patient: rowValues[id].require_patient,
       });
       fetchVolunteerTypes();
@@ -31,7 +31,7 @@ export default function VolunteerTypes({ data, venueId, fetchVolunteerTypes }) {
       await updateVolunteerType(id, {
         id,
         venue_id: venueId,
-        name: rowValues[id].name.trim(), // Ensure leading/trailing spaces are handled
+        name: rowValues[id].name.trim(),
         require_patient: rowValues[id].require_patient,
       });
       fetchVolunteerTypes();
@@ -81,7 +81,7 @@ export default function VolunteerTypes({ data, venueId, fetchVolunteerTypes }) {
     {
       field: 'name',
       headerName: 'Volunteer Type',
-      width: 200,
+      width: 250,
       renderCell: (params) =>
         editRowId === params.id ? (
           <TextField
@@ -91,6 +91,14 @@ export default function VolunteerTypes({ data, venueId, fetchVolunteerTypes }) {
             size="small"
             fullWidth
             sx={{ height: '100%' }}
+            inputProps={{
+              onKeyDown: (e) => {
+                // Prevent any unwanted behavior for space key
+                if (e.key === ' ') {
+                  e.stopPropagation();
+                }
+              },
+            }}
           />
         ) : (
           <Box
@@ -185,7 +193,13 @@ export default function VolunteerTypes({ data, venueId, fetchVolunteerTypes }) {
             <Typography variant="h5" component="div">
               Volunteer Types
             </Typography>
-            <Button onClick={handleAddRow} variant="contained" startIcon={<Add />} sx={{ mb: 2 }}>
+            <Button
+              onClick={handleAddRow}
+              variant="contained"
+              startIcon={<Add />}
+              sx={{ mb: 2 }}
+              disabled={editRowId === 'new'} // Disable button if a new row is being added
+            >
               Add Volunteer Type
             </Button>
           </Box>
