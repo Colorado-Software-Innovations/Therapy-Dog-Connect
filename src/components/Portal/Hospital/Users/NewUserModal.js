@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
@@ -31,7 +32,7 @@ const validatePhoneNumber = (phone) => {
   return e164Regex.test(phone);
 };
 
-export default function UserFormModal({ venueId,  handleClose, open }) {
+export default function UserFormModal({ venueId, handleClose, open }) {
   const notificationCtx = useContext(NotificationContext);
 
   const [userType, setUserType] = useState('');

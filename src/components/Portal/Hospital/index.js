@@ -374,6 +374,7 @@ export default function Hospital() {
             venue_id, // Include venue_id in the contact payload
           };
           await createUser({
+            // eslint-disable-next-line no-undef
             UserPoolId: process.env.REACT_APP_AWS_USER_POOL_VOLUNTEER,
             Username: contactDetails.email,
             UserAttributes: [

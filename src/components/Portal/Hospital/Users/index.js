@@ -65,12 +65,7 @@ const Index = ({ venue_id, data }) => {
             <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
               User Management
             </Typography>
-            <Button
-              variant="contained"
-              onClick={handleOpen}
-              startIcon={<PersonAdd />}
-             
-            >
+            <Button variant="contained" onClick={handleOpen} startIcon={<PersonAdd />}>
               Add User
             </Button>
           </Box>
@@ -101,7 +96,6 @@ const Index = ({ venue_id, data }) => {
                 rows={data}
                 columns={columns}
                 pageSizeOptions={[5, 10, 25, 50]}
-             
                 autoHeight
                 sx={{
                   backgroundColor: '#fafafa',
