@@ -100,8 +100,7 @@ const ChatUI = ({ drawerWidth }) => {
             boxSizing: 'border-box',
             padding: '8px 16px',
           }}
-        >
-        </Box>
+        ></Box>
         <MessageInput onSend={handleSendMessage} />
       </Box>
     </Box>

@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
-import { signUp, confirmSignUp } from 'aws-amplify/auth';
+import { confirmSignUp } from 'aws-amplify/auth';
 import LoginForm from './Form';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
 import ConfirmCode from './ConfirmCode';
-import SignUpForm from '../SignUp/Form';
 import ForgotPassword from './ForgotPassword';
+import ConfirmSignInWithNewPassword from './ConfirmSignInWithNewPassword';
 
 function Index() {
   const theme = useTheme();
@@ -16,10 +16,13 @@ function Index() {
   const authCtx = useContext(AuthContext);
   const [state, setState] = useState({
     showLoginForm: true,
-    showSignUpForm: false,
+
     showConfirmationCode: false,
+    showSignInWithNewPasswordRequired: false,
     showForgotPassword: false,
     errorMessage: '',
+    email: '',
+    password: '',
   });
 
   useEffect(() => {
@@ -33,8 +36,15 @@ function Index() {
       setState((prevState) => ({ ...prevState, errorMessage: '' }));
       e.preventDefault();
       const resp = await authCtx.logIn(email, password);
+
       if (resp && resp.nextStep) {
-        setState((prevState) => ({ ...prevState, showLoginForm: false }));
+        if (resp.nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+          setState((prevState) => ({
+            ...prevState,
+            showSignInWithNewPasswordRequired: true,
+          }));
+        }
+        setState((prevState) => ({ ...prevState, showLoginForm: false, email, password }));
       }
       if (resp.isSignedIn) {
         authCtx.isLoggedIn = resp.isSignedIn;
@@ -57,35 +67,6 @@ function Index() {
     }
   };
 
-  const toggle = () => {
-    setState((prevState) => ({
-      ...prevState,
-      showLoginForm: !prevState.showLoginForm,
-      showSignUpForm: prevState.showLoginForm,
-    }));
-  };
-
-  const handleSignUp = async (e, email, password, phoneNumber) => {
-    authCtx.setSignUpEmail(email);
-    const { isSignUpComplete } = await signUp({
-      username: email,
-      password,
-      options: {
-        userAttributes: {
-          email,
-          phone_number: phoneNumber || '+15555555555', // E.164 number convention
-        },
-      },
-    });
-    if (!isSignUpComplete) {
-      setState((prevState) => ({
-        ...prevState,
-        showSignUpForm: false,
-        showConfirmationCode: true,
-      }));
-    }
-  };
-
   const handleConfirmComplete = () => {
     setState((prevState) => ({
       ...prevState,
@@ -97,7 +78,7 @@ function Index() {
   const forgotPassword = () => {
     setState({
       showLoginForm: false,
-      showSignUpForm: false,
+
       showConfirmationCode: false,
       showForgotPassword: true,
       errorMessage: '',
@@ -107,7 +88,7 @@ function Index() {
   const handleBackToLogin = () => {
     setState({
       showLoginForm: true,
-      showSignUpForm: false,
+
       showConfirmationCode: false,
       showForgotPassword: false,
       errorMessage: '',
@@ -121,12 +102,11 @@ function Index() {
             {state.showLoginForm && (
               <LoginForm
                 handleLogin={handleLogin}
-                toggle={toggle}
                 error={state.errorMessage}
                 forgotPassword={forgotPassword}
               />
             )}
-            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+
             {state.showConfirmationCode && (
               <ConfirmCode
                 handleConfirmationCode={handleConfirmationCode}
@@ -134,6 +114,11 @@ function Index() {
               />
             )}
             {state.showForgotPassword && <ForgotPassword handleBackToLogin={handleBackToLogin} />}
+            {state.showSignInWithNewPasswordRequired && (
+              <ConfirmSignInWithNewPassword
+                user={{ email: state.email, password: state.password }}
+              />
+            )}
           </Grid>
           <Grid item xs={12} md={6} style={styles.gridItemLeft}>
             <Image />
@@ -148,12 +133,11 @@ function Index() {
             {state.showLoginForm && (
               <LoginForm
                 handleLogin={handleLogin}
-                toggle={toggle}
                 error={state.errorMessage}
                 forgotPassword={forgotPassword}
               />
             )}
-            {state.showSignUpForm && <SignUpForm toggle={toggle} handleSignUp={handleSignUp} />}
+
             {state.showConfirmationCode && (
               <ConfirmCode
                 handleConfirmationCode={handleConfirmationCode}
@@ -161,6 +145,11 @@ function Index() {
               />
             )}
             {state.showForgotPassword && <ForgotPassword handleBackToLogin={handleBackToLogin} />}
+            {state.showSignInWithNewPasswordRequired && (
+              <ConfirmSignInWithNewPassword
+                user={{ email: state.email, password: state.password }}
+              />
+            )}
           </Grid>
         </>
       )}
