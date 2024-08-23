@@ -68,7 +68,7 @@ export default function UserFormModal({ venueId, handleClose, open }) {
     };
 
     fetchVolunteerTypes();
-  }, [getVolunteerTypes, userType, venueId]);
+  }, [getVolunteerTypes, notificationCtx, userType, venueId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
