@@ -57,7 +57,7 @@ export default function UserFormModal({ venueId, handleClose, open }) {
           const volunteerTypes = await getVolunteerTypes(venueId);
           setVolunteerTypes(volunteerTypes);
         } catch (error) {
-          console.error('Failed to fetch volunteer types:', error);
+            notificationCtx.show('error', `Failed to fetch volunteer types: ${error}`);
         } finally {
           setLoadingVolunteerTypes(false);
         }
