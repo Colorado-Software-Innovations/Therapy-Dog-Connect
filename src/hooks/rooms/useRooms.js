@@ -26,6 +26,7 @@ function useRooms() {
   }, []);
 
   const updateRoom = useCallback((id, payload) => {
+    console.log(id);
     return axios
       .put(UPDATE_ROOM.replace(':id', id), payload)
       .then((response) => JSON.parse(response.data['body-json'].body))

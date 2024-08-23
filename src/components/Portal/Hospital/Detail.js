@@ -1,7 +1,19 @@
 import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { IconButton, Stack, Typography, Box, Grid, Paper, Tabs, Tab } from '@mui/material';
+import {
+  IconButton,
+  Stack,
+  Typography,
+  Box,
+  Grid,
+  Tabs,
+  Tab,
+  Card,
+  Avatar,
+  Divider,
+} from '@mui/material';
+import StyledItem from '../../UI/StyledItem';
 import LoadingOverlay from '../../UI/LoadingOverlay';
 import EditIcon from '@mui/icons-material/Edit';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -9,10 +21,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import WarningIcon from '@mui/icons-material/Warning';
 import QrCode from '../../UI/QRCode';
 import BreadCrumb from '../../UI/BreadCrumb';
-import VisitRequests from './VisitRequest';
-import Rooms from './Rooms';
-import Users from '../Users';
-import VolunteerTypes from './VolunteerTypes';
+import VisitRequests from './VisitRequests';
+import Rooms from './Room';
+import Users from './Users';
+import VolunteerTypes from './VolunteerTypes/index';
 import EditHospitalForm from './EditHospital';
 import { NotificationContext } from '../../../store/notification-context';
 import { HospitalContext } from '../../../store/hospital-context';
@@ -23,29 +35,60 @@ import useRooms from '../../../hooks/rooms/useRooms';
 import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  padding: theme.spacing(2),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  borderRadius: theme.shape.borderRadius,
+// Custom Tab styling
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  borderBottom: `2px solid ${theme.palette.divider}`,
+  '& .MuiTabs-indicator': {
+    height: '4px',
+    backgroundColor: theme.palette.primary.main,
+  },
 }));
 
-const StyledPersonDetails = styled(Box)(({ theme }) => ({
+const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: 'none',
+  fontSize: theme.typography.pxToRem(16),
+  fontWeight: theme.typography.fontWeightRegular,
+  marginRight: theme.spacing(1),
+  '&:hover': {
+    color: theme.palette.primary.main,
+    opacity: 1,
+  },
+  '&.Mui-selected': {
+    fontWeight: theme.typography.fontWeightBold,
+    color: theme.palette.primary.main,
+  },
+  '&.Mui-focusVisible': {
+    backgroundColor: theme.palette.action.focus,
+  },
+}));
+
+const StyledPersonDetails = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  padding: theme.spacing(2),
+  padding: theme.spacing(3),
   backgroundColor: theme.palette.background.paper,
   borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[1],
-  '& > *': {
+  boxShadow: theme.shadows[3],
+  '& .MuiAvatar-root': {
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+    backgroundColor: theme.palette.primary.main,
+    marginBottom: theme.spacing(2),
+  },
+  '& .MuiTypography-h6': {
     marginBottom: theme.spacing(1),
   },
-  '& svg': {
-    color: theme.palette.primary.main,
-    fontSize: '48px',
-  },
+}));
+
+const StyledQrCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
 }));
 
 const TabPanel = ({ children, value, index, ...other }) => (
@@ -272,9 +315,9 @@ const Details = () => {
                 </Stack>
               </Grid>
               <Box sx={{ borderBottom: 1, borderColor: 'divider', marginTop: 2.5 }}>
-                <Tabs value={tab} onChange={handleTabChange}>
-                  <Tab label="Details" />
-                  <Tab
+                <StyledTabs value={tab} onChange={handleTabChange} aria-label="styled tabs">
+                  <StyledTab label="Details" />
+                  <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
                         {rooms.length === 0 && <WarningIcon color="error" />}
@@ -282,7 +325,7 @@ const Details = () => {
                       </Stack>
                     }
                   />
-                  <Tab
+                  <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
                         {volunteerUsers.length === 0 && <WarningIcon color="error" />}
@@ -290,7 +333,7 @@ const Details = () => {
                       </Stack>
                     }
                   />
-                  <Tab
+                  <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
                         {volunteerTypes.length === 0 && <WarningIcon color="error" />}
@@ -298,33 +341,41 @@ const Details = () => {
                       </Stack>
                     }
                   />
-                </Tabs>
+                </StyledTabs>
               </Box>
             </Grid>
             <TabPanel value={tab} index={0}>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <StyledPersonDetails>
-                    <PersonIcon />
+                    <Avatar>
+                      <PersonIcon />
+                    </Avatar>
                     <Typography variant="h6">{`${admin?.first_name} ${admin?.last_name}`}</Typography>
                     <Typography variant="body1">{admin?.phone}</Typography>
-                    <Typography variant="body2">{admin?.email}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {admin?.email}
+                    </Typography>
                   </StyledPersonDetails>
                 </Grid>
                 <Grid item xs={6}>
-                  <Item>
+                  <StyledQrCard>
                     <QrCode
                       qrInput={QR_URL.replace(':id', hospital.id)}
-                      message="This QR code is used in the patient room to request visits to this hospital. Click to Download"
+                      message="Scan to request visits"
                       hospitalName={hospital.name}
                     />
-                  </Item>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+                      Click QR Code to download
+                    </Typography>
+                  </StyledQrCard>
                 </Grid>
                 <Grid item xs={12}>
-                  <Item>
-                    <Typography>Active Visits</Typography>
+                  <StyledItem>
+                    <Typography variant="h6">Active Visits</Typography>
+                    <Divider sx={{ my: 2 }} />
                     <VisitRequests hospitalId={hospital.id} />
-                  </Item>
+                  </StyledItem>
                 </Grid>
               </Grid>
             </TabPanel>
@@ -335,7 +386,11 @@ const Details = () => {
               <Users venue_id={hospital.id} data={users} />
             </TabPanel>
             <TabPanel value={tab} index={3}>
-              <VolunteerTypes data={volunteerTypes} fetchVolunteerTypes={fetchVolunteerTypes} />
+              <VolunteerTypes
+                venueId={hospital.id}
+                data={volunteerTypes}
+                fetchVolunteerTypes={fetchVolunteerTypes}
+              />
             </TabPanel>
           </Box>
         )}
