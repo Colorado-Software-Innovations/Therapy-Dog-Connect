@@ -1,8 +1,6 @@
-import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useContext, } from 'react';
 import { Grid, Button, TextField } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import { useParams } from 'react-router-dom';
-import { HospitalContext } from '../../../store/hospital-context';
 import { NotificationContext } from '../../../store/notification-context';
 import useRooms from '../../../hooks/rooms/useRooms';
 import LoadingOverlay from '../../UI/LoadingOverlay';
@@ -11,45 +9,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function Rooms({ hospitalId }) {
+export default function Rooms({ hospitalId, fetchRooms, data }) {
   const [isAddingNewRow, setIsAddingNewRow] = useState(false);
-  const [roomState, setRoomState] = useState({ isLoading: true, data: [] });
+  const [roomState, setRoomState] = useState({ isLoading: false, data });
   const [editRowId, setEditRowId] = useState(null);
   const [editRowValue, setEditRowValue] = useState('');
   const [newRowValue, setNewRowValue] = useState('');
 
   const notificationCtx = useContext(NotificationContext);
-  const hospitalCtx = useContext(HospitalContext);
-  const params = useParams();
-  const { addRoom, fetchRoomsByHospitalId, updateRoom } = useRooms();
-  const hasFetched = useRef(false); // To prevent fetching rooms multiple times on initial load
 
-  const fetchRooms = useCallback(
-    async (forceFetch = false) => {
-      if (forceFetch || !hospitalCtx.selectedHospital?.rooms) {
-        try {
-          const response = await fetchRoomsByHospitalId(params.id);
-          setRoomState({ isLoading: false, data: response || [] });
-          hospitalCtx.setSelectedHospital((prev) => ({
-            ...prev,
-            rooms: response || [],
-          }));
-        } catch (error) {
-          notificationCtx.show('error', `Failed to fetch room numbers. ${error}`);
-        }
-      } else {
-        setRoomState({ isLoading: false, data: hospitalCtx.selectedHospital.rooms });
-      }
-    },
-    [fetchRoomsByHospitalId, params.id, notificationCtx, hospitalCtx],
-  );
-
-  useEffect(() => {
-    if (!hasFetched.current) {
-      fetchRooms(true); // Force fetch on first load
-      hasFetched.current = true;
-    }
-  }, [fetchRooms]);
+  const { addRoom, updateRoom } = useRooms();
 
   const processRowUpdate = async (newRow) => {
     try {
@@ -199,7 +168,7 @@ export default function Rooms({ hospitalId }) {
         </Button>
         <Grid item xs={12}>
           <DataGrid
-            rows={roomState.data}
+            rows={roomState.data ? roomState.data : []}
             columns={columns}
             editMode="row"
             density="compact"

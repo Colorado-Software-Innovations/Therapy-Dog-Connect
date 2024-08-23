@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react';
-import AWS from 'aws-sdk';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
   Box,
@@ -11,39 +10,21 @@ import {
   Radio,
   FormHelperText,
   IconButton,
+  Select,
+  MenuItem,
+  CircularProgress,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { NotificationContext } from '../../../store/notification-context';
 import useUser from '../../../hooks/users/useUsers';
+import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
+import createUser from '../../Services/Cognito';
+import phoneFormatter from '../../../utils/PhoneFormatter';
 
-const cognito = new AWS.CognitoIdentityServiceProvider({
-  region: 'us-east-1', // Your region
-  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-});
-
-// Helper function to validate email format
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(String(email).toLowerCase());
-};
-
-// Updated helper function to validate and format phone number in E.164
-const formatPhoneNumber = (phone) => {
-  // Strip out non-numeric characters except for the leading +
-  const cleaned = phone.replace(/[^\d+]/g, '');
-
-  // Ensure the phone number starts with +1 and has no extra +1 prefixes
-  if (cleaned.startsWith('+1')) {
-    return cleaned; // If it already starts with +1, return as is
-  } else if (cleaned.startsWith('+')) {
-    return cleaned; // If it starts with another country code, return as is
-  } else if (cleaned.length <= 10) {
-    return '+1' + cleaned; // Assume US number and prepend +1
-  }
-
-  return '+' + cleaned;
 };
 
 const validatePhoneNumber = (phone) => {
@@ -55,6 +36,9 @@ export default function UserFormModal({ venueId }) {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState(false);
   const [userType, setUserType] = useState('');
+  const [volunteerType, setVolunteerType] = useState('');
+  const [volunteerTypes, setVolunteerTypes] = useState([]);
+  const [loadingVolunteerTypes, setLoadingVolunteerTypes] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -63,9 +47,31 @@ export default function UserFormModal({ venueId }) {
   const [errors, setErrors] = useState({});
 
   const { addPerson } = useUser();
+  const { getVolunteerTypes } = useVolunteerTypes();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    const fetchVolunteerTypes = async () => {
+      if (userType === 'Volunteer') {
+        setLoadingVolunteerTypes(true);
+        try {
+          const volunteerTypes = await getVolunteerTypes(venueId);
+          setVolunteerTypes(volunteerTypes);
+        } catch (error) {
+          console.error('Failed to fetch volunteer types:', error);
+        } finally {
+          setLoadingVolunteerTypes(false);
+        }
+      } else {
+        setVolunteerTypes([]);
+        setVolunteerType('');
+      }
+    };
+
+    fetchVolunteerTypes();
+  }, [getVolunteerTypes, userType, venueId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,6 +79,8 @@ export default function UserFormModal({ venueId }) {
     let newErrors = {};
 
     if (!userType) newErrors.userType = 'User type is required';
+    if (userType === 'Volunteer' && !volunteerType)
+      newErrors.volunteerType = 'Volunteer Type is required';
     if (!firstName) newErrors.firstName = 'First name is required';
     if (!lastName) newErrors.lastName = 'Last name is required';
     if (!email) newErrors.email = 'Email is required';
@@ -80,7 +88,6 @@ export default function UserFormModal({ venueId }) {
     if (!confirmEmail) newErrors.confirmEmail = 'Confirm email is required';
     else if (email !== confirmEmail) newErrors.confirmEmail = 'Emails do not match';
 
-    // Validate optional phone field
     if (phone && !validatePhoneNumber(phone)) {
       newErrors.phone = 'Invalid phone number';
     }
@@ -88,10 +95,11 @@ export default function UserFormModal({ venueId }) {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      const newUser = { userType, firstName, lastName, email, phone };
+      const newUser = { userType, volunteerType, firstName, lastName, email, phone };
+      let params;
       if (newUser.userType === 'Admin') {
-        const params = {
-          UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ADMIN, // User pool ID
+        params = {
+          UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ADMIN,
           Username: email,
           UserAttributes: [
             {
@@ -115,33 +123,65 @@ export default function UserFormModal({ venueId }) {
               Value: `${venueId}`,
             },
           ],
-          DesiredDeliveryMediums: ['EMAIL'], // Send the invite via email
+          DesiredDeliveryMediums: ['EMAIL'],
         };
-        try {
-          const result = await cognito.adminCreateUser(params).promise();
-          if (result?.User?.Username) {
-            const payload = {
-              auth_user_id: result.User.Username,
-              email: email,
-              first_name: firstName,
-              is_active: false,
-              last_name: lastName,
-              phone: phone,
-              role: userType,
-              venue_id: venueId,
-            };
-            await addPerson(payload);
+      } else if (newUser.userType === 'Volunteer') {
+        params = {
+          UserPoolId: process.env.REACT_APP_AWS_USER_POOL_VOLUNTEER,
+          Username: email,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: email,
+            },
+            {
+              Name: 'phone_number',
+              Value: phone,
+            },
+            {
+              Name: 'family_name',
+              Value: lastName,
+            },
+            {
+              Name: 'given_name',
+              Value: firstName,
+            },
+            {
+              Name: 'custom:venueId',
+              Value: `${venueId}`,
+            },
+          ],
+          DesiredDeliveryMediums: ['EMAIL'],
+        };
+      }
+      try {
+        const result = await createUser(params);
+        if (result?.User?.Username) {
+          const payload = {
+            auth_user_id: result.User.Username,
+            email: email,
+            first_name: firstName,
+            is_active: false,
+            last_name: lastName,
+            phone: phone,
+            role: userType,
+            venue_id: venueId,
+          };
+          if (volunteerType && volunteerType.id) {
+            payload.volunteer_type_id = volunteerType.id;
           }
-          notificationCtx.show('success', `User Invite sent to: ${email}`);
-        } catch (error) {
-          notificationCtx.show('error', `Failed to send User Invite. ${error}`);
+          await addPerson(payload);
         }
+        notificationCtx.show('success', `User Invite sent to: ${email}`);
+      } catch (error) {
+        notificationCtx.show('error', `Failed to send User Invite. ${error}`);
       }
       handleClose();
     }
   };
+
   const handlePhoneChange = (e) => {
-    const formattedPhone = formatPhoneNumber(e.target.value);
+    const formattedPhone = phoneFormatter(e.target.value);
     setPhone(formattedPhone);
   };
 
@@ -157,7 +197,7 @@ export default function UserFormModal({ venueId }) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 500,
+            width: 600,
             bgcolor: 'background.paper',
             boxShadow: 24,
             p: 4,
@@ -185,6 +225,36 @@ export default function UserFormModal({ venueId }) {
               <FormControlLabel value="Volunteer" control={<Radio />} label="Volunteer" />
             </RadioGroup>
             {errors.userType && <FormHelperText error>{errors.userType}</FormHelperText>}
+
+            {userType === 'Volunteer' && (
+              <>
+                <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                  Volunteer Type
+                </Typography>
+                {loadingVolunteerTypes ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <Select
+                    fullWidth
+                    value={volunteerType}
+                    onChange={(e) => setVolunteerType(e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Volunteer Type
+                    </MenuItem>
+                    {volunteerTypes.map((type) => (
+                      <MenuItem key={type.id} value={type.id}>
+                        {type.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+                {errors.volunteerType && (
+                  <FormHelperText error>{errors.volunteerType}</FormHelperText>
+                )}
+              </>
+            )}
 
             <TextField
               fullWidth

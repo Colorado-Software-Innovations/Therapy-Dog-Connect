@@ -1,26 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Grid,  } from '@mui/material';
-import useUsers from '../../../hooks/users/useUsers';
-import { Promise } from 'bluebird';
+import { Grid } from '@mui/material';
 import StatusCell from '../../UI/StatusCell';
-import { NotificationContext } from '../../../store/notification-context';
-import LoadingOverlay from '../../UI/LoadingOverlay';
+
 import UserFormModal from './NewUserModal';
 
-const Index = ({ venue_id }) => {
-  const { getUserByVenueId } = useUsers();
-  const notificationCtx = useContext(NotificationContext);
-  const [usersState, setUsersState] = useState({
-    isLoading: true,
-    name: '',
-    data: [],
-  });
-
+const Index = ({ venue_id, data }) => {
   const columns = [
     { field: 'id', headerName: 'ID' },
     { field: 'role', headerName: 'Role' },
-    { field: 'user', headerName: 'User' },
+    { field: 'user', headerName: 'User', width: 250 },
     {
       field: 'is_active',
       headerName: 'Status',
@@ -34,45 +23,16 @@ const Index = ({ venue_id }) => {
     { field: 'phone', headerName: 'Phone', width: 250 },
   ];
 
-  useEffect(() => {
-    Promise.try(() => {
-      getUserByVenueId(venue_id)
-        .then((response) => {
-          const responseBody = JSON.parse(response.data['body-json'].body);
-          const data = responseBody.map((user) => {
-            return {
-              id: user.id,
-              role: user.role,
-              user: `${user.first_name} ${user.last_name}`,
-              email: user.email,
-              phone: user.phone,
-              is_active: user.is_active,
-            };
-          });
-          setUsersState((prevState) => ({
-            ...prevState,
-            isLoading: false,
-            data,
-          }));
-        })
-        .catch((err) => {
-          notificationCtx.show('error', `Failed to fetch users. : ${err}`);
-        });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleRowClick = () => {};
 
   return (
     <div>
-      {usersState.isLoading && <LoadingOverlay />}
-      <UserFormModal venueId={venue_id}/>
+      <UserFormModal venueId={venue_id} />
       <Grid container style={{ marginTop: 20 }}>
         <Grid item xs={12}>
           <DataGrid
             onRowClick={handleRowClick}
-            rows={usersState.data}
+            rows={data}
             columns={columns}
             density="compact"
             pageSizeOptions={[25, 50, 100]}

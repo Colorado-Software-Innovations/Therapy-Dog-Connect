@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useContext, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import { Button, Grid, TextField, Select, MenuItem } from '@mui/material';
@@ -9,40 +9,16 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
 import { NotificationContext } from '../../../store/notification-context';
-import LoadingOverlay from '../../UI/LoadingOverlay';
 
-const VolunteerTypes = () => {
+const VolunteerTypes = ({ data, fetchVolunteerTypes }) => {
   const notificationCtx = useContext(NotificationContext);
-  const { getVolunteerTypes, updateVolunteerType, addVolunteerType } = useVolunteerTypes();
+  const { updateVolunteerType, addVolunteerType } = useVolunteerTypes();
   const { id: venue_id } = useParams();
 
-  const [volunteerTypesState, setVolunteerTypesState] = useState({
-    isLoading: true,
-    data: [],
-  });
+  
   const [isAddingNewRow, setIsAddingNewRow] = useState(false);
   const [editRowId, setEditRowId] = useState(null);
   const [rowValues, setRowValues] = useState({});
-  const hasFetched = useRef(false);
-
-  const fetchVolunteerTypes = useCallback(async () => {
-    setVolunteerTypesState((prev) => ({ ...prev, isLoading: true }));
-    try {
-      const response = await getVolunteerTypes(venue_id);
-      setVolunteerTypesState({ isLoading: false, data: response });
-    } catch (error) {
-      notificationCtx.show('error', `Failed to fetch volunteer types. ${error}`);
-    }
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getVolunteerTypes, venue_id]);
-
-  useEffect(() => {
-    if (!hasFetched.current) {
-      fetchVolunteerTypes();
-      hasFetched.current = true;
-    }
-  }, [fetchVolunteerTypes]);
 
   const processRowUpdate = useCallback(
     async (newRow) => {
@@ -83,20 +59,14 @@ const VolunteerTypes = () => {
     setIsAddingNewRow(true);
     setEditRowId('new');
     setRowValues({ new: { name: '', require_patient: 0 } });
-    setVolunteerTypesState((prev) => ({
-      ...prev,
-      data: [{ id: 'new', name: '', require_patient: 0 }, ...prev.data],
-    }));
+    
   };
 
   const handleCancelAddRow = () => {
     setIsAddingNewRow(false);
     setEditRowId(null);
     setRowValues({});
-    setVolunteerTypesState((prev) => ({
-      ...prev,
-      data: prev.data.filter((row) => row.id !== 'new'),
-    }));
+   
   };
 
   const handleDeleteRow = async (id) => {
@@ -110,7 +80,7 @@ const VolunteerTypes = () => {
   };
 
   const handleEditClick = (id) => {
-    const row = volunteerTypesState.data.find((row) => row.id === id);
+    const row = data.find((row) => row.id === id);
     if (row) {
       setEditRowId(id);
       setRowValues((prev) => ({ ...prev, [id]: row }));
@@ -237,9 +207,7 @@ const VolunteerTypes = () => {
 
   return (
     <div>
-      {volunteerTypesState.isLoading ? (
-        <LoadingOverlay />
-      ) : (
+
         <Grid container style={{ marginTop: 20 }}>
           <Button
             onClick={handleAddRow}
@@ -252,7 +220,7 @@ const VolunteerTypes = () => {
           </Button>
           <Grid item xs={12}>
             <DataGrid
-              rows={volunteerTypesState.data}
+              rows={data}
               columns={columns}
               editMode="row"
               density="compact"
@@ -272,7 +240,7 @@ const VolunteerTypes = () => {
             />
           </Grid>
         </Grid>
-      )}
+      
     </div>
   );
 };
