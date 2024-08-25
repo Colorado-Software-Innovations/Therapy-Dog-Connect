@@ -1,268 +1,403 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import LoadingOverlay from '../../UI/LoadingOverlay';
 import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import { IconButton, Stack, Typography } from '@mui/material';
-import { NotificationContext } from '../../../store/notification-context';
-import Grid from '@mui/material/Grid';
-import EditHospitalForm from './EditHospital';
-import Box from '@mui/material/Box';
+import {
+  IconButton,
+  Stack,
+  Typography,
+  Box,
+  Grid,
+  Tabs,
+  Tab,
+  Card,
+  Avatar,
+  Divider,
+} from '@mui/material';
+import StyledItem from '../../UI/StyledItem';
+import LoadingOverlay from '../../UI/LoadingOverlay';
 import EditIcon from '@mui/icons-material/Edit';
-import QrCode from '../../UI/QRCode';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonIcon from '@mui/icons-material/Person';
-import VisitRequests from './VisitRequest';
+import WarningIcon from '@mui/icons-material/Warning';
+import QrCode from '../../UI/QRCode';
 import BreadCrumb from '../../UI/BreadCrumb';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Rooms from './Rooms';
+import VisitRequests from './VisitRequests';
+import Rooms from './Room';
+import Users from './Users';
+import VolunteerTypes from './VolunteerTypes/index';
+import EditHospitalForm from './EditHospital';
+import { NotificationContext } from '../../../store/notification-context';
+import { HospitalContext } from '../../../store/hospital-context';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
-import usePerson from '../../../hooks/users/useUsers';
+import useUsers from '../../../hooks/users/useUsers';
+import useRooms from '../../../hooks/rooms/useRooms';
+import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
 import { QR_URL } from '../../../constants/restfulQueryConstants';
-import Users from '../Users';
-import VolunteerTypes from './VolunteerTypes';
+
+// Custom Tab styling
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  borderBottom: `2px solid ${theme.palette.divider}`,
+  '& .MuiTabs-indicator': {
+    height: '4px',
+    backgroundColor: theme.palette.primary.main,
+  },
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: 'none',
+  fontSize: theme.typography.pxToRem(16),
+  fontWeight: theme.typography.fontWeightRegular,
+  marginRight: theme.spacing(1),
+  '&:hover': {
+    color: theme.palette.primary.main,
+    opacity: 1,
+  },
+  '&.Mui-selected': {
+    fontWeight: theme.typography.fontWeightBold,
+    color: theme.palette.primary.main,
+  },
+  '&.Mui-focusVisible': {
+    backgroundColor: theme.palette.action.focus,
+  },
+}));
+
+const StyledPersonDetails = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
+  '& .MuiAvatar-root': {
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+    backgroundColor: theme.palette.primary.main,
+    marginBottom: theme.spacing(2),
+  },
+  '& .MuiTypography-h6': {
+    marginBottom: theme.spacing(1),
+  },
+}));
+
+const StyledQrCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
+}));
+
+const TabPanel = ({ children, value, index, ...other }) => (
+  <div role="tabpanel" hidden={value !== index} {...other}>
+    {value === index && (
+      <Box sx={{ p: 3 }}>
+        <Typography>{children}</Typography>
+      </Box>
+    )}
+  </div>
+);
 
 const Details = () => {
-  const [hospital, setHospital] = useState(null);
-  const [admin, setAdmin] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [tab, setTab] = useState(0);
-
-  const notificationCtx = useContext(NotificationContext);
-  const params = useParams();
+  const { fetchRoomsByHospitalId } = useRooms();
   const { updateAddress } = useAddress();
   const { fetchVenueById, updateVenue } = useVenues();
-  const { updatePerson } = usePerson();
+  const { updatePerson, getUserByVenueId } = useUsers();
+  const { getVolunteerTypes } = useVolunteerTypes();
+  const hospitalCtx = useContext(HospitalContext);
+  const notificationCtx = useContext(NotificationContext);
+  const params = useParams();
+  const hasFetched = useRef(false);
+
+  const [hospitalData, setHospitalData] = useState({
+    hospital: null,
+    admin: null,
+    rooms: [],
+    users: [],
+    volunteerTypes: [],
+    loading: { hospital: true, rooms: true, users: true, volunteerTypes: true },
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [tab, setTab] = useState(0);
+
+  const setLoadingState = (key, value) => {
+    setHospitalData((prev) => ({
+      ...prev,
+      loading: { ...prev.loading, [key]: value },
+    }));
+  };
 
   const fetchHospitalDetails = useCallback(async () => {
-    setIsLoading(true);
+    setLoadingState('hospital', true);
     try {
       const response = await fetchVenueById(params.id);
       const responseBody = JSON.parse(response.data['body-json'].body);
-      if (responseBody.length) {
-        const users = responseBody[0].Users;
-        const admins = users.filter((u) => u.role === 'Admin' && u.is_active);
-        setAdmin(admins[0]);
-      }
-      setHospital(responseBody[0]);
+      const hospital = responseBody[0];
+      const admins = hospital?.Users?.filter((u) => u.role === 'Admin' && u.is_active) || [];
+      setHospitalData((prev) => ({
+        ...prev,
+        hospital,
+        admin: admins[0],
+      }));
     } catch (error) {
-      notificationCtx.show('error', `Failed to fetch hospital. ${error}`);
+      notificationCtx.show('error', `Failed to fetch hospital: ${error}`);
     } finally {
-      setIsLoading(false);
+      setLoadingState('hospital', false);
     }
   }, [fetchVenueById, notificationCtx, params.id]);
+
+  const fetchRooms = useCallback(
+    async (forceFetch = false) => {
+      setLoadingState('rooms', true);
+      if (forceFetch || !hospitalCtx.selectedHospital?.rooms) {
+        try {
+          const response = await fetchRoomsByHospitalId(params.id);
+          setHospitalData((prev) => ({
+            ...prev,
+            rooms: response || [],
+          }));
+          hospitalCtx.setSelectedHospital((prev) => ({
+            ...prev,
+            rooms: response || [],
+          }));
+        } catch (error) {
+          notificationCtx.show('error', `Failed to fetch rooms: ${error}`);
+        } finally {
+          setLoadingState('rooms', false);
+        }
+      } else {
+        setHospitalData((prev) => ({
+          ...prev,
+          rooms: hospitalCtx.selectedHospital.rooms,
+        }));
+        setLoadingState('rooms', false);
+      }
+    },
+    [fetchRoomsByHospitalId, params.id, notificationCtx, hospitalCtx],
+  );
+
+  const fetchUsers = useCallback(async () => {
+    setLoadingState('users', true);
+    try {
+      const response = await getUserByVenueId(params.id);
+      const responseBody = JSON.parse(response.data['body-json'].body);
+      const users = responseBody.map((user) => ({
+        id: user.id,
+        role: user.role,
+        user: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        phone: user.phone,
+        is_active: user.is_active,
+      }));
+      setHospitalData((prev) => ({
+        ...prev,
+        users,
+      }));
+    } catch (error) {
+      notificationCtx.show('error', `Failed to fetch users: ${error}`);
+    } finally {
+      setLoadingState('users', false);
+    }
+  }, [getUserByVenueId, notificationCtx, params.id]);
+
+  const fetchVolunteerTypes = useCallback(async () => {
+    setLoadingState('volunteerTypes', true);
+    try {
+      const response = await getVolunteerTypes(params.id);
+      setHospitalData((prev) => ({
+        ...prev,
+        volunteerTypes: response,
+      }));
+    } catch (error) {
+      notificationCtx.show('error', `Failed to fetch volunteer types: ${error}`);
+    } finally {
+      setLoadingState('volunteerTypes', false);
+    }
+  }, [getVolunteerTypes, params.id, notificationCtx]);
 
   useEffect(() => {
     fetchHospitalDetails();
   }, [fetchHospitalDetails]);
 
+  useEffect(() => {
+    if (!hasFetched.current) {
+      fetchRooms(true);
+      fetchUsers();
+      fetchVolunteerTypes();
+      hasFetched.current = true;
+    }
+  }, [fetchRooms, fetchUsers, fetchVolunteerTypes]);
+
   const handleSave = async (values) => {
     try {
-      const hospitalPayload = {
-        name: values.hospital_name,
-        is_active: values.is_active,
-      };
-      const contactPayload = {
-        first_name: values.first_name,
-        last_name: values.last_name,
-        email: values.email,
-        phone: values.phone,
-        role: 'Admin',
-      };
-      const addressPayload = {
-        street_1: values.street_1,
-        street_2: values.street_2,
-        city: values.city,
-        state: values.state,
-        postal_code: values.postal_code,
-      };
-
-      const venuePromise = updateVenue(hospital.id, hospitalPayload);
-      const addressPromise = updateAddress(hospital.Address.id, addressPayload);
-      const personPromise = updatePerson(hospital.User.id, contactPayload);
-
-      await Promise.all([venuePromise, addressPromise, personPromise]);
-
-      notificationCtx.show('success', `Hospital: ${hospital.id} updated successfully.`);
+      const promises = [
+        updateVenue(hospitalData.hospital.id, {
+          name: values.hospital_name,
+          is_active: values.is_active,
+        }),
+        updateAddress(hospitalData.hospital.Address.id, {
+          street_1: values.street_1,
+          street_2: values.street_2,
+          city: values.city,
+          state: values.state,
+          postal_code: values.postal_code,
+        }),
+        updatePerson(hospitalData.hospital.User.id, {
+          first_name: values.first_name,
+          last_name: values.last_name,
+          email: values.email,
+          phone: values.phone,
+          role: 'Admin',
+        }),
+      ];
+      await Promise.all(promises);
+      notificationCtx.show('success', `Hospital ${hospitalData.hospital.id} updated successfully.`);
       fetchHospitalDetails();
       setIsEditing(false);
     } catch (error) {
-      notificationCtx.show('error', `Oops something went wrong: ${error}`);
+      notificationCtx.show('error', `Failed to update hospital: ${error}`);
     }
   };
 
-  const handleCancelClick = () => {
-    setIsEditing(false);
-  };
+  const handleTabChange = (event, newValue) => setTab(newValue);
 
-  if (isLoading) {
+  const { hospital, admin, rooms, users, volunteerTypes, loading } = hospitalData;
+  const volunteerUsers = users.filter((u) => u.role === 'Volunteer');
+
+  if (loading.hospital || loading.rooms || loading.users || loading.volunteerTypes) {
     return <LoadingOverlay />;
   }
 
-  const Item = styled(Paper)(({ theme, display }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    height: '100%',
-    color: theme.palette.text.secondary,
-    display: display,
-  }));
-
-  const TabPanel = (props) => {
-    const { children, value, index, ...other } = props;
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
+  return hospital ? (
+    <>
+      <BreadCrumb
+        middleCrumb={{ link: '/admin/hospitals', text: 'Hospitals' }}
+        lastCrumb={hospital.name}
+      />
+      <Grid style={{ marginTop: 20 }}>
+        {isEditing ? (
+          <EditHospitalForm
+            buttonText="Save"
+            handleSave={handleSave}
+            handleCancelClick={() => setIsEditing(false)}
+            initialValues={{
+              id: hospital.id,
+              email: hospital.User.email,
+              first_name: hospital.User.first_name,
+              last_name: hospital.User.last_name,
+              phone: hospital.User.phone,
+              hospital_name: hospital.name,
+              street_1: hospital.Address.street_1,
+              street_2: hospital.Address.street_2,
+              city: hospital.Address.city,
+              state: hospital.Address.state,
+              postal_code: hospital.Address.postal_code,
+              is_active: hospital.is_active,
+            }}
+          />
+        ) : (
+          <Box sx={{ flexGrow: 1 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12}>
+                <Stack direction="row">
+                  <Typography variant="h4">{hospital.name}</Typography>
+                  <IconButton onClick={() => setIsEditing(true)}>
+                    <EditIcon />
+                  </IconButton>
+                </Stack>
+                <Stack direction="row" sx={{ marginTop: 1 }}>
+                  <LocationOnIcon />
+                  <Typography>{`${hospital.Address.street_1} ${hospital.Address.street_2}, ${hospital.Address.city}, ${hospital.Address.state}, ${hospital.Address.postal_code}`}</Typography>
+                </Stack>
+              </Grid>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider', marginTop: 2.5 }}>
+                <StyledTabs value={tab} onChange={handleTabChange} aria-label="styled tabs">
+                  <StyledTab label="Details" />
+                  <StyledTab
+                    label={
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {rooms.length === 0 && <WarningIcon color="error" />}
+                        <Typography>Rooms</Typography>
+                      </Stack>
+                    }
+                  />
+                  <StyledTab
+                    label={
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {volunteerUsers.length === 0 && <WarningIcon color="error" />}
+                        <Typography>Users</Typography>
+                      </Stack>
+                    }
+                  />
+                  <StyledTab
+                    label={
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {volunteerTypes.length === 0 && <WarningIcon color="error" />}
+                        <Typography>Volunteer Types</Typography>
+                      </Stack>
+                    }
+                  />
+                </StyledTabs>
+              </Box>
+            </Grid>
+            <TabPanel value={tab} index={0}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <StyledPersonDetails>
+                    <Avatar>
+                      <PersonIcon />
+                    </Avatar>
+                    <Typography variant="h6">{`${admin?.first_name} ${admin?.last_name}`}</Typography>
+                    <Typography variant="body1">{admin?.phone}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {admin?.email}
+                    </Typography>
+                  </StyledPersonDetails>
+                </Grid>
+                <Grid item xs={6}>
+                  <StyledQrCard>
+                    <QrCode
+                      qrInput={QR_URL.replace(':id', hospital.id)}
+                      message="Scan to request visits"
+                      hospitalName={hospital.name}
+                    />
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+                      Click QR Code to download
+                    </Typography>
+                  </StyledQrCard>
+                </Grid>
+                <Grid item xs={12}>
+                  <StyledItem>
+                    <Typography variant="h6">Active Visits</Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <VisitRequests hospitalId={hospital.id} />
+                  </StyledItem>
+                </Grid>
+              </Grid>
+            </TabPanel>
+            <TabPanel value={tab} index={1}>
+              <Rooms hospitalId={params.id} fetchRooms={fetchRooms} data={rooms} />
+            </TabPanel>
+            <TabPanel value={tab} index={2}>
+              <Users venue_id={hospital.id} data={users} />
+            </TabPanel>
+            <TabPanel value={tab} index={3}>
+              <VolunteerTypes
+                venueId={hospital.id}
+                data={volunteerTypes}
+                fetchVolunteerTypes={fetchVolunteerTypes}
+              />
+            </TabPanel>
           </Box>
         )}
-      </div>
-    );
-  };
-
-  const handleTabChange = (event, newValue) => {
-    setTab(newValue);
-  };
-  return (
-    <>
-      {hospital ? (
-        <>
-          <BreadCrumb
-            middleCrumb={{ link: '/admin/hospitals', text: 'Hospitals' }}
-            lastCrumb={hospital.name}
-          />
-          <Grid style={{ marginTop: 20 }}>
-            {isEditing ? (
-              <EditHospitalForm
-                buttonText={'Save'}
-                handleSave={handleSave}
-                handleCancelClick={handleCancelClick}
-                initialValues={{
-                  id: hospital.id,
-                  email: hospital.User.email,
-                  first_name: hospital.User.first_name,
-                  last_name: hospital.User.last_name,
-                  phone: hospital.User.phone,
-                  hospital_name: hospital.name,
-                  street_1: hospital.Address.street_1,
-                  street_2: hospital.Address.street_2,
-                  city: hospital.Address.city,
-                  state: hospital.Address.state,
-                  postal_code: hospital.Address.postal_code,
-                  is_active: hospital.is_active,
-                }}
-              />
-            ) : (
-              <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2} alignItems="center" justifyContent="left">
-                  <Grid item xs={12}>
-                    <Stack direction="row">
-                      <Typography style={{ textAlign: 'left' }} variant="h4" component="h2">
-                        {hospital.name}
-                      </Typography>
-                      <IconButton
-                        style={{ height: 40, marginTop: 0, marginLeft: 5 }}
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <EditIcon style={{ height: 40 }} />
-                      </IconButton>
-                    </Stack>
-                    <Stack direction="row" style={{ textAlign: 'left', marginTop: 5 }}>
-                      <LocationOnIcon style={{ fontSize: 24 }} />
-                      <Typography style={{ marginLeft: 5 }}>
-                        {hospital.Address.street_1} {hospital.Address.street_2}{' '}
-                        {hospital.Address.city}, {hospital.Address.state},{' '}
-                        {hospital.Address.postal_code}
-                      </Typography>
-                    </Stack>
-                  </Grid>
-                  <Box
-                    sx={{
-                      borderBottom: 1,
-                      borderColor: 'divider',
-                      marginTop: 2.5,
-                      marginLeft: 2.5,
-                    }}
-                  >
-                    <Tabs value={tab} onChange={handleTabChange} aria-label="basic tabs example">
-                      <Tab label="Details" />
-                      <Tab label="Rooms" />
-                      <Tab label="Users" />
-                      <Tab label="Volunteer Types" />
-                    </Tabs>
-                  </Box>
-                </Grid>
-                <TabPanel value={tab} index={0}>
-                  <Grid
-                    container
-                    rowSpacing={{ xs: 2, sm: 4, md: 4 }}
-                    columnSpacing={{ xs: 2, sm: 4, md: 4 }}
-                  >
-                    <Grid item xs={6}>
-                      <Item display="flex">
-                        <Box m="auto">
-                          <PersonIcon style={{ fontSize: 35 }} />
-                          <Typography>
-                            {admin?.first_name} {admin?.last_name}
-                          </Typography>
-                          <Typography>{admin?.phone}</Typography>
-                          <Typography>{admin?.email}</Typography>
-                        </Box>
-                      </Item>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Item style={{ textAlign: 'left' }} display="flex">
-                        <QrCode
-                          qrInput={QR_URL.replace(':id', hospital.id)}
-                          message={
-                            'This QR code is used in the patient room to request visits to this hospital. Click to Download'
-                          }
-                          hospitalName={hospital.name}
-                        />
-                      </Item>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Item>
-                        <Typography
-                          style={{ marginTop: 10, marginBottom: 10, textAlign: 'center' }}
-                        >
-                          Active Visits
-                        </Typography>
-                        <VisitRequests hospitalId={hospital.id} />
-                      </Item>
-                    </Grid>
-                  </Grid>
-                </TabPanel>
-                <TabPanel value={tab} index={1}>
-                  <Rooms hospitalId={params.id} isAdmin={true} />
-                </TabPanel>
-                <TabPanel value={tab} index={2}>
-                  <Users venue_id={hospital.id} />
-                </TabPanel>
-                <TabPanel value={tab} index={3}>
-                  <VolunteerTypes />
-                </TabPanel>
-              </Box>
-            )}
-          </Grid>
-        </>
-      ) : (
-        <Typography variant="h5" component="h2">
-          No hospital data found.
-        </Typography>
-      )}
+      </Grid>
     </>
+  ) : (
+    <Typography variant="h5">No hospital data found.</Typography>
   );
 };
 

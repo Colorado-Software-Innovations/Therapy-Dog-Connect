@@ -115,15 +115,21 @@ const ChatUI = ({ drawerWidth, isDrawerOpen }) => {
         </List>
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          height: '100%',
-          overflow: 'hidden',
-        }}
-      ></Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, height: '100%' }}>
+        <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 2 }}>
+          <Messages messages={messages} />
+          <Box ref={messagesEndRef} />
+        </Box>
+        <Box
+          sx={{
+            borderTop: 1,
+            borderColor: 'divider',
+            boxSizing: 'border-box',
+            padding: '8px 16px',
+          }}
+        ></Box>
+        <MessageInput onSend={handleSendMessage} />
+      </Box>
     </Box>
   );
 };

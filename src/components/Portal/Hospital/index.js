@@ -31,6 +31,8 @@ import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
 import StatusCell from '../../UI/StatusCell';
+import createUser from '../../Services/Cognito';
+import phoneFormatter from '../../../utils/PhoneFormatter';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 50 },
@@ -357,7 +359,7 @@ export default function Hospital() {
     };
 
     addVenue(hospitalPayload)
-      .then((hospitalResponse) => {
+      .then(async (hospitalResponse) => {
         if (hospitalResponse.status === 200) {
           const hospitalResponseBody = JSON.parse(hospitalResponse.data['body-json'].body);
           const venue_id = hospitalResponseBody.id;
@@ -366,11 +368,39 @@ export default function Hospital() {
             first_name: contactDetails.first_name,
             last_name: contactDetails.last_name,
             email: contactDetails.email,
-            phone: contactDetails.phone,
+            phone: phoneFormatter(contactDetails.phone),
             role: 'Admin',
             is_active: true,
             venue_id, // Include venue_id in the contact payload
           };
+          await createUser({
+            // eslint-disable-next-line no-undef
+            UserPoolId: process.env.REACT_APP_AWS_USER_POOL_VOLUNTEER,
+            Username: contactDetails.email,
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: contactDetails.email,
+              },
+              {
+                Name: 'phone_number',
+                Value: phoneFormatter(contactDetails.phone),
+              },
+              {
+                Name: 'family_name',
+                Value: contactDetails.last_name,
+              },
+              {
+                Name: 'given_name',
+                Value: contactDetails.first_name,
+              },
+              {
+                Name: 'custom:venueId',
+                Value: `${venue_id}`,
+              },
+            ],
+            DesiredDeliveryMediums: ['EMAIL'],
+          });
 
           return addPerson(contactPayload).then((contactResponse) => {
             if (contactResponse.status === 200) {
