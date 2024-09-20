@@ -38,7 +38,7 @@ function useUser() {
   const getUserByVenueId = useCallback((venue_id) => {
     return axios
       .get(GET_USERS_BY_VENUE_ID.replace(':id', venue_id))
-      .then((response) => response)
+      .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => {
         throw err;
       });

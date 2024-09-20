@@ -184,8 +184,7 @@ const Details = () => {
     setLoadingState('users', true);
     try {
       const response = await getUserByVenueId(params.id);
-      const responseBody = JSON.parse(response.data['body-json'].body);
-      const users = responseBody.map((user) => ({
+      const users = response.map((user) => ({
         id: user.id,
         role: user.role,
         user: `${user.first_name} ${user.last_name}`,

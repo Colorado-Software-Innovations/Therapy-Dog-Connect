@@ -78,6 +78,11 @@ export default function Admin() {
   const [open, setOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
+  // Add null checks for authCtx.currentUser
+  const currentUser = authCtx.currentUser || {};
+  const { family_name = '', given_name = '' } = currentUser.attributes || {};
+  const userHospitalId = currentUser.attributes?.['custom:venueId'] || '';
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -97,6 +102,13 @@ export default function Admin() {
   const handleLogout = () => {
     authCtx.logOut();
     navigate('/login');
+  };
+
+  const getInitials = () => {
+    if (given_name && family_name) {
+      return `${given_name[0].toUpperCase()}${family_name[0].toUpperCase()}`;
+    }
+    return null;
   };
 
   return (
@@ -119,7 +131,11 @@ export default function Admin() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar />
+                {getInitials() ? (
+                  <Avatar>{getInitials()}</Avatar>
+                ) : (
+                  <Avatar /> // Default Avatar if initials are not available
+                )}
               </IconButton>
             </Tooltip>
             <Menu
@@ -180,14 +196,16 @@ export default function Admin() {
               </Tooltip>
               <ListItemText primary="Chat" />
             </ListItemButton>
-            <ListItemButton component={RouterLink} to="hospitals/49">
-              <Tooltip title="My Hospital">
-                <ListItemIcon>
-                  <DomainAddIcon />
-                </ListItemIcon>
-              </Tooltip>
-              <ListItemText primary="My Hospital" />
-            </ListItemButton>
+            {userHospitalId && (
+              <ListItemButton component={RouterLink} to={`hospitals/${userHospitalId}`}>
+                <Tooltip title="My Hospital">
+                  <ListItemIcon>
+                    <DomainAddIcon />
+                  </ListItemIcon>
+                </Tooltip>
+                <ListItemText primary="My Hospital" />
+              </ListItemButton>
+            )}
           </List>
         </Box>
         <Box>
