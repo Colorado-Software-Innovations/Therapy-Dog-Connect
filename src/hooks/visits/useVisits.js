@@ -5,7 +5,10 @@ import { ADD_VISIT, FETCH_VISIT_BY_HOSPITAL_ID } from '../../constants/restfulQu
 function useVisits() {
   const addVisit = useCallback((payload) => {
     return axios
-      .post(ADD_VISIT, payload)
+      .post(ADD_VISIT, payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -14,7 +17,10 @@ function useVisits() {
 
   const fetchVisitsByHospitalId = useCallback((id) => {
     return axios
-      .get(FETCH_VISIT_BY_HOSPITAL_ID.replace(':id', id))
+      .get(FETCH_VISIT_BY_HOSPITAL_ID.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;

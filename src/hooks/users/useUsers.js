@@ -10,7 +10,10 @@ import {
 function useUser() {
   const addPerson = useCallback((payload) => {
     return axios
-      .post(ADD_PERSON, payload)
+      .post(ADD_PERSON, payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -19,7 +22,10 @@ function useUser() {
 
   const deletePerson = useCallback((id) => {
     return axios
-      .delete(DELETE_PERSON.replace(':id', id))
+      .delete(DELETE_PERSON.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -28,7 +34,10 @@ function useUser() {
 
   const updatePerson = useCallback((id, payload) => {
     return axios
-      .put(UPDATE_PERSON.replace(':id', id), payload)
+      .put(UPDATE_PERSON.replace(':id', id), payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -37,8 +46,11 @@ function useUser() {
 
   const getUserByVenueId = useCallback((venue_id) => {
     return axios
-      .get(GET_USERS_BY_VENUE_ID.replace(':id', venue_id))
-      .then((response) => JSON.parse(response.data['body-json'].body))
+      .get(GET_USERS_BY_VENUE_ID.replace(':id', venue_id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
+      .then((response) => response)
       .catch((err) => {
         throw err;
       });

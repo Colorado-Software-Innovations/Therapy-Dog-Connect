@@ -10,7 +10,10 @@ import {
 function useAddress() {
   const fetchAddressById = useCallback((id) => {
     return axios
-      .get(FETCH_ADDRESS_BY_ID.replace(':id', id))
+      .get(FETCH_ADDRESS_BY_ID.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -19,7 +22,10 @@ function useAddress() {
 
   const addAddress = useCallback((payload) => {
     return axios
-      .post(ADD_ADDRESS, payload)
+      .post(ADD_ADDRESS, payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -28,7 +34,10 @@ function useAddress() {
 
   const deleteAddress = useCallback((id) => {
     return axios
-      .delete(DELETE_ADDRESS.replace(':id', id))
+      .delete(DELETE_ADDRESS.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
@@ -37,7 +46,10 @@ function useAddress() {
 
   const updateAddress = useCallback((id, payload) => {
     return axios
-      .put(UPDATE_ADDRESS.replace(':id', id), payload)
+      .put(UPDATE_ADDRESS.replace(':id', id), payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => {
         throw err;
