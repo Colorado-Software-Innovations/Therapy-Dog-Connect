@@ -10,14 +10,12 @@ import {
   Tabs,
   Tab,
   Card,
-  Avatar,
   Divider,
 } from '@mui/material';
 import StyledItem from '../../UI/StyledItem';
 import LoadingOverlay from '../../UI/LoadingOverlay';
 import EditIcon from '@mui/icons-material/Edit';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PersonIcon from '@mui/icons-material/Person';
 import WarningIcon from '@mui/icons-material/Warning';
 import QrCode from '../../UI/QRCode';
 import BreadCrumb from '../../UI/BreadCrumb';
@@ -62,24 +60,6 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   },
 }));
 
-const StyledPersonDetails = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: theme.spacing(3),
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[3],
-  '& .MuiAvatar-root': {
-    width: theme.spacing(7),
-    height: theme.spacing(7),
-    backgroundColor: theme.palette.primary.main,
-    marginBottom: theme.spacing(2),
-  },
-  '& .MuiTypography-h6': {
-    marginBottom: theme.spacing(1),
-  },
-}));
 
 const StyledQrCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -137,7 +117,7 @@ const Details = () => {
       const response = await fetchVenueById(params.id);
       const responseBody = JSON.parse(response.data['body-json'].body);
       const hospital = responseBody[0];
-      const admins = hospital?.Users?.filter((u) => u.role === 'Admin' && u.is_active) || [];
+      const admins = hospital?.users?.filter((u) => u.role === 'Admin' && u.is_active) || [];
       setHospitalData((prev) => ({
         ...prev,
         hospital,
@@ -265,7 +245,7 @@ const Details = () => {
 
   const handleTabChange = (event, newValue) => setTab(newValue);
 
-  const { hospital, admin, rooms, users, volunteerTypes, loading } = hospitalData;
+  const { hospital, rooms, users, volunteerTypes, loading } = hospitalData;
   const volunteerUsers = users.filter((u) => u.role === 'Volunteer');
 
   if (loading.hospital || loading.rooms || loading.users || loading.volunteerTypes) {
@@ -311,12 +291,12 @@ const Details = () => {
                 </Stack>
                 <Stack direction="row" sx={{ marginTop: 1 }}>
                   <LocationOnIcon />
-                  <Typography>{`${hospital.Address.street_1} ${hospital.Address.street_2}, ${hospital.Address.city}, ${hospital.Address.state}, ${hospital.Address.postal_code}`}</Typography>
+                  <Typography>{`${hospital.Address?.street_1} ${hospital.Address?.street_2}, ${hospital.Address?.city}, ${hospital.Address?.state}, ${hospital.Address?.postal_code}`}</Typography>
                 </Stack>
               </Grid>
               <Box sx={{ borderBottom: 1, borderColor: 'divider', marginTop: 2.5 }}>
                 <StyledTabs value={tab} onChange={handleTabChange} aria-label="styled tabs">
-                  <StyledTab label="Details" />
+                  <StyledTab label="Patient Visits" />
                   <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -328,16 +308,17 @@ const Details = () => {
                   <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
-                        {volunteerUsers.length === 0 && <WarningIcon color="error" />}
-                        <Typography>Users</Typography>
+                        {volunteerTypes.length === 0 && <WarningIcon color="error" />}
+                        <Typography>Volunteer Types</Typography>
                       </Stack>
                     }
                   />
+
                   <StyledTab
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
-                        {volunteerTypes.length === 0 && <WarningIcon color="error" />}
-                        <Typography>Volunteer Types</Typography>
+                        {volunteerUsers.length === 0 && <WarningIcon color="error" />}
+                        <Typography>Users</Typography>
                       </Stack>
                     }
                   />
@@ -346,19 +327,7 @@ const Details = () => {
             </Grid>
             <TabPanel value={tab} index={0}>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <StyledPersonDetails>
-                    <Avatar>
-                      <PersonIcon />
-                    </Avatar>
-                    <Typography variant="h6">{`${admin?.first_name} ${admin?.last_name}`}</Typography>
-                    <Typography variant="body1">{admin?.phone}</Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {admin?.email}
-                    </Typography>
-                  </StyledPersonDetails>
-                </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <StyledQrCard>
                     <QrCode
                       qrInput={QR_URL.replace(':id', hospital.id)}
@@ -383,14 +352,14 @@ const Details = () => {
               <Rooms hospitalId={params.id} fetchRooms={fetchRooms} data={rooms} />
             </TabPanel>
             <TabPanel value={tab} index={2}>
-              <Users venue_id={hospital.id} data={users} />
-            </TabPanel>
-            <TabPanel value={tab} index={3}>
               <VolunteerTypes
                 venueId={hospital.id}
                 data={volunteerTypes}
                 fetchVolunteerTypes={fetchVolunteerTypes}
               />
+            </TabPanel>
+            <TabPanel value={tab} index={3}>
+              <Users venue_id={hospital.id} data={users} />
             </TabPanel>
           </Box>
         )}
