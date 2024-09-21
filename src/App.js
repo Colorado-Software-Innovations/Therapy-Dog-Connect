@@ -14,7 +14,7 @@ import { AuthContext } from './store/auth-context';
 import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
-import Details from './components/Portal/Hospital/Detail';
+import VisitDetails from './components/Portal/Hospital/VisitDetails';
 // eslint-disable-next-line
 import config from './amplifyconfiguration.json';
 import SnackbarAlert from './components/UI/SnackBarAlert';
@@ -48,7 +48,7 @@ function App() {
               path="hospitals/:id"
               element={
                 <HospitalContextProvider>
-                  <Details />
+                  <VisitDetails />
                 </HospitalContextProvider>
               }
             />

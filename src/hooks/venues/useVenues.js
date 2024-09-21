@@ -9,36 +9,52 @@ import {
 } from '../../constants/restfulQueryConstants';
 
 function useVenues() {
-  const fetchAllVenues = useCallback((headers) => {
+  const fetchAllVenues = useCallback(() => {
+    
     return axios
-      .get(FETCH_ALL_VENUES, headers)
+      .get(FETCH_ALL_VENUES, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => err);
   }, []);
   const fetchVenueById = useCallback((id) => {
     return axios
-      .get(FETCH_VENUE_BY_ID.replace(':id', id))
+      .get(FETCH_VENUE_BY_ID.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => err);
   }, []);
 
   const updateVenue = useCallback((id, payload) => {
     return axios
-      .put(UPDATE_VENUE.replace(':id', id), payload)
+      .put(UPDATE_VENUE.replace(':id', id), payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => err);
   }, []);
 
   const deleteVenue = useCallback((id) => {
     return axios
-      .delete(DELETE_VENUE.replace(':id', id))
+      .delete(DELETE_VENUE.replace(':id', id), {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => err);
   }, []);
 
   const addVenue = useCallback((payload) => {
     return axios
-      .post(ADD_VENUE, payload)
+      .post(ADD_VENUE, payload, {
+        // eslint-disable-next-line no-undef
+        headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
+      })
       .then((response) => response)
       .catch((err) => err);
   }, []);
