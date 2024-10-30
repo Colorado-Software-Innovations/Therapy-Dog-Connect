@@ -21,6 +21,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import { STATES } from '../../../constants/states';
+import { DEFAULT_VOLUNTEER_TYPE } from '../../../constants/defaults';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import isEmpty from 'lodash/isEmpty';
@@ -30,6 +31,7 @@ import Breadcrumb from '../../UI/BreadCrumb';
 import useAddress from '../../../hooks/address/useAddress';
 import useVenues from '../../../hooks/venues/useVenues';
 import usePerson from '../../../hooks/users/useUsers';
+import useVolunteerTypes from '../../../hooks/volunteerTypes/useVolunteerTypes';
 import StatusCell from '../../UI/StatusCell';
 import createUser from '../../Services/Cognito';
 import phoneFormatter from '../../../utils/PhoneFormatter';
@@ -150,6 +152,7 @@ export default function Hospital() {
   const { addAddress } = useAddress();
   const { fetchAllVenues, addVenue } = useVenues();
   const { addPerson } = usePerson();
+  const { addVolunteerType } = useVolunteerTypes();
 
   useEffect(() => {
     Promise.try(() => {
@@ -363,6 +366,14 @@ export default function Hospital() {
         if (hospitalResponse.status === 200) {
           const hospitalResponseBody = JSON.parse(hospitalResponse.data['body-json'].body);
           const venue_id = hospitalResponseBody.id;
+
+          const volunteerTypePayload = {
+            name: DEFAULT_VOLUNTEER_TYPE,
+            venue_id,
+            required_patient: true,
+          };
+
+          await addVolunteerType(volunteerTypePayload);
 
           const contactPayload = {
             first_name: contactDetails.first_name,
