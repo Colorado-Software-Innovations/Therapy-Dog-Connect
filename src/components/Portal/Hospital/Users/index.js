@@ -13,7 +13,7 @@ const Index = ({ venue_id, data }) => {
     {
       field: 'role',
       headerName: 'Role',
-      width: 150,
+      width: 65,
       renderCell: (params) => (
         <Box
           sx={{
@@ -30,7 +30,7 @@ const Index = ({ venue_id, data }) => {
         </Box>
       ),
     },
-    { field: 'user', headerName: 'User', width: 250 },
+    { field: 'user', headerName: 'User', width: 200 },
     {
       field: 'is_active',
       headerName: 'Approved',
@@ -49,13 +49,15 @@ const Index = ({ venue_id, data }) => {
       ),
       width: 120,
     },
-    { field: 'email', headerName: 'Email', width: 250 },
+    { field: 'email', headerName: 'Email', width: 270 },
     { field: 'phone', headerName: 'Phone', width: 200 },
   ];
 
   const handleRowClick = () => {};
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    return setOpen(false);
+  };
 
   return (
     <Box sx={{ mt: 4, mb: 4 }}>
