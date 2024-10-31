@@ -375,7 +375,7 @@ export default function Hospital() {
           };
           await createUser({
             // eslint-disable-next-line no-undef
-            UserPoolId: process.env.REACT_APP_AWS_USER_POOL_VOLUNTEER,
+            UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ADMIN,
             Username: contactDetails.email,
             UserAttributes: [
               {

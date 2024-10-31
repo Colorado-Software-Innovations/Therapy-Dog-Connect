@@ -1,17 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import {
-  IconButton,
-  Stack,
-  Typography,
-  Box,
-  Grid,
-  Tabs,
-  Tab,
-  Card,
-  Divider,
-} from '@mui/material';
+import { IconButton, Stack, Typography, Box, Grid, Tabs, Tab, Card, Divider } from '@mui/material';
 import StyledItem from '../../UI/StyledItem';
 import LoadingOverlay from '../../UI/LoadingOverlay';
 import EditIcon from '@mui/icons-material/Edit';
@@ -59,7 +49,6 @@ const StyledTab = styled(Tab)(({ theme }) => ({
     backgroundColor: theme.palette.action.focus,
   },
 }));
-
 
 const StyledQrCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -164,6 +153,7 @@ const Details = () => {
     setLoadingState('users', true);
     try {
       const response = await getUserByVenueId(params.id);
+      console.log(response);
       const users = response.map((user) => ({
         id: user.id,
         role: user.role,
