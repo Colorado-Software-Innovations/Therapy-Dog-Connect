@@ -50,7 +50,7 @@ function useUser() {
         // eslint-disable-next-line no-undef
         headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
       })
-      .then((response) => response)
+      .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => {
         throw err;
       });
