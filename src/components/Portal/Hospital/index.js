@@ -156,14 +156,13 @@ export default function Hospital() {
       if (hospitalCtx.hospitals.length === 0) {
         fetchAllVenues()
           .then((response) => {
-            const respBody = JSON.parse(response.data['body-json'].body);
-            if (respBody && respBody.length) {
+            if (response && response.length) {
               setHospitalState((prevState) => ({
                 ...prevState,
                 isLoading: false,
-                data: respBody,
+                data: response,
               }));
-              hospitalCtx.setHospitalData(respBody);
+              hospitalCtx.setHospitalData(response);
             }
           })
           .catch((error) => {
@@ -375,7 +374,7 @@ export default function Hospital() {
           };
           await createUser({
             // eslint-disable-next-line no-undef
-            UserPoolId: process.env.REACT_APP_AWS_USER_POOL_VOLUNTEER,
+            UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ADMIN,
             Username: contactDetails.email,
             UserAttributes: [
               {

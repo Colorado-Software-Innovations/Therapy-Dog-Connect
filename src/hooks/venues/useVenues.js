@@ -10,13 +10,12 @@ import {
 
 function useVenues() {
   const fetchAllVenues = useCallback(() => {
-    
     return axios
       .get(FETCH_ALL_VENUES, {
         // eslint-disable-next-line no-undef
         headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
       })
-      .then((response) => response)
+      .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => err);
   }, []);
   const fetchVenueById = useCallback((id) => {
@@ -25,7 +24,7 @@ function useVenues() {
         // eslint-disable-next-line no-undef
         headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
       })
-      .then((response) => response)
+      .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => err);
   }, []);
 

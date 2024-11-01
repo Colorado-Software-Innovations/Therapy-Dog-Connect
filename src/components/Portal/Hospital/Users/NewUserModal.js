@@ -57,7 +57,7 @@ export default function UserFormModal({ venueId, handleClose, open }) {
           const volunteerTypes = await getVolunteerTypes(venueId);
           setVolunteerTypes(volunteerTypes);
         } catch (error) {
-            notificationCtx.show('error', `Failed to fetch volunteer types: ${error}`);
+          notificationCtx.show('error', `Failed to fetch volunteer types: ${error}`);
         } finally {
           setLoadingVolunteerTypes(false);
         }
@@ -134,8 +134,8 @@ export default function UserFormModal({ venueId, handleClose, open }) {
             role: userType,
             venue_id: venueId,
           };
-          if (volunteerType && volunteerType.id) {
-            payload.volunteer_type_id = volunteerType.id;
+          if (volunteerType) {
+            payload.volunteer_type_id = volunteerType;
           }
           await addPerson(payload);
         }

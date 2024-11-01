@@ -1,6 +1,13 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect } from 'react';
-import { signIn, signOut, confirmSignIn, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import {
+  signIn,
+  signOut,
+  confirmSignIn,
+  getCurrentUser,
+  fetchAuthSession,
+  fetchUserAttributes,
+} from 'aws-amplify/auth';
 export const AuthContext = createContext({
   token: null,
   isLoggedIn: false,
@@ -23,6 +30,8 @@ function AuthContextProvider({ children }) {
     const checkUserSession = async () => {
       try {
         const user = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
+        user.attributes = attributes;
         setCurrentUser(user);
         setIsSignedIn(true);
 

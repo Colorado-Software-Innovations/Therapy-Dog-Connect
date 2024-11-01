@@ -15,6 +15,8 @@ import HospitalContextProvider from './store/hospital-context';
 import Hospitals from './components/Portal/Hospital';
 import Chat from './components/Portal/Chat';
 import VisitDetails from './components/Portal/Hospital/VisitDetails';
+import Settings from './components/Portal/Settings';
+import RequestVisit from './components/Visits';
 // eslint-disable-next-line
 import config from './amplifyconfiguration.json';
 import SnackbarAlert from './components/UI/SnackBarAlert';
@@ -33,6 +35,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/request  demo" element={<RequestDemo />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/visit/hospitals/:id" element={<RequestVisit />} />
 
         {authCtx.isLoggedIn && (
           <Route path="/admin" element={<AdminHome />}>
@@ -53,6 +56,7 @@ function App() {
               }
             />
             <Route path="chat" element={<Chat />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         )}
       </Routes>

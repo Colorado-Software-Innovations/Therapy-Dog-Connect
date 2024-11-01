@@ -18,7 +18,7 @@ export const UPDATE_ROOM = `${BASE_URL}/room/:id`;
  * Visits Service
  */
 
-export const ADD_VISIT = `${BASE_URL}/visits/`;
+export const ADD_VISIT = `${BASE_URL}/visit/`;
 export const FETCH_VISIT_BY_HOSPITAL_ID = `${BASE_URL}/visit?venue_id=:id`;
 export const QR_URL = `http://localhost:3000/visit/hospitals/:id`;
 
