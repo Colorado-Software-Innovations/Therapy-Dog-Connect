@@ -93,7 +93,6 @@ const Index = () => {
         const response = await requestVisit(payload);
         if (response && response.id) {
           setSuccessMessage('You are now on the active waiting list.');
-          
         } else {
           setErrorMessage('Failed to add you to the active waiting list.');
         }
@@ -118,13 +117,13 @@ const Index = () => {
   };
 
   const resetForm = () => {
-      setFormData({
-        firstName: '',
-        lastName: '',
-        roomNumber: '',
-        termsAccepted: false,
-      });
-  }
+    setFormData({
+      firstName: '',
+      lastName: '',
+      roomNumber: '',
+      termsAccepted: false,
+    });
+  };
   const handleCloseSnackbar = () => {
     setSuccessMessage('');
     setErrorMessage('');

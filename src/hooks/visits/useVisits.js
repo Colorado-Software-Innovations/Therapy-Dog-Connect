@@ -4,7 +4,6 @@ import { ADD_VISIT, FETCH_VISIT_BY_HOSPITAL_ID } from '../../constants/restfulQu
 
 function useVisits() {
   const requestVisit = useCallback((payload) => {
-    
     return axios
       .post(ADD_VISIT, payload, {
         // eslint-disable-next-line no-undef

@@ -156,7 +156,6 @@ export default function Hospital() {
       if (hospitalCtx.hospitals.length === 0) {
         fetchAllVenues()
           .then((response) => {
-           
             if (response && response.length) {
               setHospitalState((prevState) => ({
                 ...prevState,

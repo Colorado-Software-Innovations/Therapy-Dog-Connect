@@ -27,7 +27,11 @@ const Messages = ({ messages, sender, selectedContact }) => {
             }}
           >
             {!isSender && (
-              <Avatar alt={message.sender} src={isRecipient ? selectedContact.imageUrl : message.avatar || null} sx={{ marginRight: 1 }}>
+              <Avatar
+                alt={message.sender}
+                src={isRecipient ? selectedContact.imageUrl : message.avatar || null}
+                sx={{ marginRight: 1 }}
+              >
                 {(!isRecipient || !selectedContact.imageUrl) && getInitials(message.sender)}
               </Avatar>
             )}
