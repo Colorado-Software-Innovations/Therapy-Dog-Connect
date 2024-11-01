@@ -55,7 +55,6 @@ function AuthContextProvider({ children }) {
     if (result.isSignedIn) {
       setIsSignedIn(result.isSignedIn);
       const session = await getUserSession();
-      console.log(session);
       const token = session.tokens.accessToken.toString();
       setToken(token);
     }

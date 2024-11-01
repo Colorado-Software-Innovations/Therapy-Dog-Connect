@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   List,
@@ -38,13 +39,10 @@ const ChatUI = ({ drawerWidth }) => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('here', data);
       if (data.action === 'retrieveMessages') {
-        console.log('retrieveMessages', data);
         // Assuming the server responds with the retrieved messages
         setMessages(data.messages || []); // Ensure it sets an array to avoid errors
       } else if (data.action === 'sendMessage') {
-        console.log('sendMessage', data);
         // Handle incoming messages
         setMessages((prevMessages) => [...prevMessages, data]);
       }
