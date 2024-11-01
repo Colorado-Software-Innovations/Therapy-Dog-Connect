@@ -49,7 +49,6 @@ const Index = () => {
         const response = await fetchVenueById(hospitalId);
         setVenueData(response[0]);
       } catch (error) {
-        console.error('Something went wrong', error);
         setErrorMessage('Failed to load hospital information.');
       } finally {
         setLoading(false); // Ensure loading is turned off after fetch
@@ -99,7 +98,6 @@ const Index = () => {
           setErrorMessage('Failed to add you to the active waiting list.');
         }
       } catch (error) {
-        console.error('Something went wrong with the request', error);
         setErrorMessage('An error occurred while submitting your request.');
       } finally {
         setSubmitting(false); // Reset submitting to false after request is done
