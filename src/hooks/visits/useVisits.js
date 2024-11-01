@@ -3,13 +3,14 @@ import axios from 'axios';
 import { ADD_VISIT, FETCH_VISIT_BY_HOSPITAL_ID } from '../../constants/restfulQueryConstants';
 
 function useVisits() {
-  const addVisit = useCallback((payload) => {
+  const requestVisit = useCallback((payload) => {
+    
     return axios
       .post(ADD_VISIT, payload, {
         // eslint-disable-next-line no-undef
         headers: { Authorization: process.env.REACT_APP_AUTHORIZATION_KEY },
       })
-      .then((response) => response)
+      .then((response) => JSON.parse(response.data['body-json'].body))
       .catch((err) => {
         throw err;
       });
@@ -27,7 +28,7 @@ function useVisits() {
       });
   }, []);
   return {
-    addVisit,
+    requestVisit,
     fetchVisitsByHospitalId,
   };
 }

@@ -156,14 +156,14 @@ export default function Hospital() {
       if (hospitalCtx.hospitals.length === 0) {
         fetchAllVenues()
           .then((response) => {
-            const respBody = JSON.parse(response.data['body-json'].body);
-            if (respBody && respBody.length) {
+           
+            if (response && response.length) {
               setHospitalState((prevState) => ({
                 ...prevState,
                 isLoading: false,
-                data: respBody,
+                data: response,
               }));
-              hospitalCtx.setHospitalData(respBody);
+              hospitalCtx.setHospitalData(response);
             }
           })
           .catch((error) => {
