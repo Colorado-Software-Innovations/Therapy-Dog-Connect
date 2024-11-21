@@ -25,7 +25,6 @@ const Delete = () => {
     setIsLoading(true);
 
     const { id, Address, User, name, addressId, userId } = hospitalCtx.selectedHospital;
-
     try {
       await Promise.all([
         deletePerson(userId || User?.id),

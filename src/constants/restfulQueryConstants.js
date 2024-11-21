@@ -20,7 +20,7 @@ export const UPDATE_ROOM = `${BASE_URL}/room/:id`;
 
 export const ADD_VISIT = `${BASE_URL}/visit/`;
 export const FETCH_VISIT_BY_HOSPITAL_ID = `${BASE_URL}/visit?venue_id=:id`;
-export const QR_URL = `http://localhost:3000/visit/hospitals/:id`;
+export const QR_URL = `${BASE_URL}/visit/hospitals/:id`;
 
 /**
  * Venue (Hospital) Service
@@ -46,3 +46,9 @@ export const GET_USERS_BY_VENUE_ID = `${BASE_URL}/user?venue_id=:id`;
 export const ADD_VOLUNTEER_TYPE = `${BASE_URL}/volunteer-types`;
 export const FETCH_VOLUNTEER_TYPES = `${BASE_URL}/volunteer-types`;
 export const UPDATE_VOLUNTEER_TYPES = `${BASE_URL}/volunteer-types/:id`;
+
+/**
+ * Dog Service
+ */
+export const FETCH_DOG = `${BASE_URL}/dog`;
+export const UPDATE_DOG = `${BASE_URL}/dog/:dogId`;

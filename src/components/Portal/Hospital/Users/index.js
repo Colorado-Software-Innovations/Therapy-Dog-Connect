@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Grid, Box, Typography, Button } from '@mui/material';
 import StatusCell from '../../../UI/StatusCell';
 import UserFormModal from './NewUserModal';
 import { PersonAdd } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { AppContext } from '../../../../store/global-context';
 
 const Index = ({ venue_id, data }) => {
+  const { setSelectedUser } = useContext(AppContext);
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const columns = [
@@ -53,80 +57,85 @@ const Index = ({ venue_id, data }) => {
     { field: 'phone', headerName: 'Phone', width: 200 },
   ];
 
-  const handleRowClick = () => {};
+  const handleRowClick = ({ row }) => {
+    setSelectedUser(row);
+    navigate(`users/${row.id}`);
+  };
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   return (
-    <Box sx={{ mt: 4, mb: 4 }}>
-      <Grid container direction="column" spacing={3}>
-        <Grid item>
-          <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-              User Management
-            </Typography>
-            <Button variant="contained" onClick={handleOpen} startIcon={<PersonAdd />}>
-              Add User
-            </Button>
-          </Box>
-        </Grid>
-
-        <Grid item>
-          <UserFormModal
-            venueId={venue_id}
-            handleOpen={handleOpen}
-            handleClose={handleClose}
-            open={open}
-          />
-        </Grid>
-
-        <Grid item>
-          {data.length > 0 ? (
-            <Box
-              sx={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                boxShadow: 4,
-                p: 3,
-                border: '1px solid #e0e0e0',
-              }}
-            >
-              <DataGrid
-                onRowClick={handleRowClick}
-                rows={data}
-                columns={columns}
-                pageSizeOptions={[5, 10, 25, 50]}
-                autoHeight
-                sx={{
-                  backgroundColor: '#fafafa',
-                  borderRadius: 2,
-                  '& .MuiDataGrid-cell': { px: 1.5 },
-                  '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#f5f5f5',
-                    borderBottom: '1px solid #e0e0e0',
-                  },
-                  '& .MuiDataGrid-footerContainer': {
-                    borderTop: '1px solid #e0e0e0',
-                    backgroundColor: '#fafafa',
-                  },
-                  '& .MuiDataGrid-cell:focus-within': {
-                    outline: 'none',
-                  },
-                }}
-              />
+    <>
+      <Box sx={{ mt: 4, mb: 4 }}>
+        <Grid container direction="column" spacing={3}>
+          <Grid item>
+            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+                User Management
+              </Typography>
+              <Button variant="contained" onClick={handleOpen} startIcon={<PersonAdd />}>
+                Add User
+              </Button>
             </Box>
-          ) : (
-            <Typography
-              variant="h6"
-              color="textSecondary"
-              sx={{ textAlign: 'center', mt: 3, fontWeight: 500 }}
-            >
-              No users available at this time.
-            </Typography>
-          )}
+          </Grid>
+
+          <Grid item>
+            <UserFormModal
+              venueId={venue_id}
+              handleOpen={handleOpen}
+              handleClose={handleClose}
+              open={open}
+            />
+          </Grid>
+
+          <Grid item>
+            {data.length > 0 ? (
+              <Box
+                sx={{
+                  backgroundColor: '#fff',
+                  borderRadius: '8px',
+                  boxShadow: 4,
+                  p: 3,
+                  border: '1px solid #e0e0e0',
+                }}
+              >
+                <DataGrid
+                  onRowClick={handleRowClick}
+                  rows={data}
+                  columns={columns}
+                  pageSizeOptions={[5, 10, 25, 50]}
+                  autoHeight
+                  sx={{
+                    backgroundColor: '#fafafa',
+                    borderRadius: 2,
+                    '& .MuiDataGrid-cell': { px: 1.5 },
+                    '& .MuiDataGrid-columnHeaders': {
+                      backgroundColor: '#f5f5f5',
+                      borderBottom: '1px solid #e0e0e0',
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                      borderTop: '1px solid #e0e0e0',
+                      backgroundColor: '#fafafa',
+                    },
+                    '& .MuiDataGrid-cell:focus-within': {
+                      outline: 'none',
+                    },
+                  }}
+                />
+              </Box>
+            ) : (
+              <Typography
+                variant="h6"
+                color="textSecondary"
+                sx={{ textAlign: 'center', mt: 3, fontWeight: 500 }}
+              >
+                No users available at this time.
+              </Typography>
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
 };
 

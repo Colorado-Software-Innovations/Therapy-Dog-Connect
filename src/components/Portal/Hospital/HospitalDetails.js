@@ -166,7 +166,8 @@ const Details = () => {
       const users = response.map((user) => ({
         id: user.id,
         role: user.role,
-        user: `${user.first_name} ${user.last_name}`,
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
         phone: user.phone,
         is_active: user.is_active,
@@ -255,12 +256,11 @@ const Details = () => {
     window.open(QRLink, '_blank');
   };
 
+  const crumbs = [{ text: 'Hospitals', link: '/admin/hospitals' }, { text: hospital.name }];
+
   return hospital ? (
     <>
-      <BreadCrumb
-        middleCrumb={{ link: '/admin/hospitals', text: 'Hospitals' }}
-        lastCrumb={hospital.name}
-      />
+      <BreadCrumb crumbs={crumbs} />
       <Grid style={{ marginTop: 20 }}>
         {isEditing ? (
           <EditHospitalForm

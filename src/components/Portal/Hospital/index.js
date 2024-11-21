@@ -2,6 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Promise } from 'bluebird';
 import { DataGrid } from '@mui/x-data-grid';
+import { AppContext } from '../../../store/global-context';
 import { AuthContext } from '../../../store/auth-context';
 import { HospitalContext } from '../../../store/hospital-context';
 import { NotificationContext } from '../../../store/notification-context';
@@ -147,6 +148,8 @@ export default function Hospital() {
   const authCtx = useContext(AuthContext);
   const hospitalCtx = useContext(HospitalContext);
   const notificationCtx = useContext(NotificationContext);
+  const { setSelectedHospital} =
+    useContext(AppContext);
   const { addAddress } = useAddress();
   const { fetchAllVenues, addVenue } = useVenues();
   const { addPerson } = usePerson();
@@ -182,7 +185,7 @@ export default function Hospital() {
   const handleRowClick = ({ row }) => {
     const selectedHospital = _.first(hospitalState.data.filter((data) => data.id === row.id));
 
-    hospitalCtx.setSelectedHospital(selectedHospital);
+    setSelectedHospital(selectedHospital);
     navigate(`${row.id}`);
   };
 
@@ -675,14 +678,11 @@ export default function Hospital() {
   if (hospitalState.isLoading) {
     return <LoadingOverlay />;
   }
+
+  const crumbs = [{ text: 'Hospitals', link: 'http:localhost:3000/hospitals' }];
   return (
     <>
-      <Breadcrumb
-        middleCrumb={{
-          link: 'http:localhost:3000/hospitals',
-          text: 'Hospitals',
-        }}
-      ></Breadcrumb>
+      <Breadcrumb crumbs={crumbs}></Breadcrumb>
       <Dialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
