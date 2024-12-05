@@ -171,6 +171,7 @@ const Details = () => {
         email: user.email,
         phone: user.phone,
         is_active: user.is_active,
+        profile_image_url: user.profile_image_url
       }));
       setHospitalData((prev) => ({
         ...prev,

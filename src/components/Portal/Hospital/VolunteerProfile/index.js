@@ -1,4 +1,5 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+/* eslint-disable no-undef */
+import React, { useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -21,40 +22,56 @@ import { AppContext } from '../../../../store/global-context';
 import ProfilePicture from '../../../UI/ProfilePicture';
 import useDogs from '../../../../hooks/dogs/useDogs';
 
+const formatDate = (date) => {
+  if (!date) return 'Unknown';
+  const [year, month, day] = date.split('-');
+  return `${month}/${day}/${year}`;
+};
+
+const generateUploadPath = (hospitalName, userFullName, dogName = '') => {
+  const sanitizedHospital = hospitalName.replace(/\s+/g, '_');
+  const sanitizedUser = userFullName.replace(/\s+/g, '_');
+  const sanitizedDogName = dogName.replace(/\s+/g, '_');
+  const fileName = `${sanitizedDogName || Date.now()}.jpg`;
+  return `${sanitizedHospital}/${sanitizedUser}/${fileName}`;
+};
+
 const ProfilePage = () => {
   const { selectedHospital, selectedUser } = useContext(AppContext);
   const [isActive, setIsActive] = useState(selectedUser.is_active);
   const [dogs, setDogs] = useState([]);
   const [uploadedUrl, setUploadedUrl] = useState('');
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
   const { fetchDogByUserId, updateDog } = useDogs();
 
+  const userFullName = useMemo(
+    () => `${selectedUser.first_name}_${selectedUser.last_name}`,
+    [selectedUser],
+  );
+
   const fetchDogs = useCallback(async () => {
-    setLoading(true); // Set loading to true before fetching
+    setLoading(true);
     try {
       const response = await fetchDogByUserId(selectedUser.id);
-      const mappedResponse = response.map((dog) => ({
-        ...dog,
-        isSaving: false,
-        isEditing: false,
-      }));
-      setDogs(mappedResponse);
+      setDogs(
+        response.map((dog) => ({
+          ...dog,
+          isSaving: false,
+          isEditing: false,
+        })),
+      );
     } catch (error) {
       console.error('Error fetching dogs:', error);
     } finally {
-      setLoading(false); // Set loading to false after fetching
+      setLoading(false);
     }
   }, [fetchDogByUserId, selectedUser.id]);
 
   useEffect(() => {
-    if (selectedUser?.id) {
-      fetchDogs();
-    }
+    if (selectedUser?.id) fetchDogs();
   }, []);
 
-  const handleToggleChange = (event) => {
-    setIsActive(event.target.checked);
-  };
+  const handleToggleChange = (event) => setIsActive(event.target.checked);
 
   const handleBioChange = (index, newBio) => {
     setDogs((prevDogs) =>
@@ -63,15 +80,15 @@ const ProfilePage = () => {
   };
 
   const handleSave = async (index) => {
+    const dogToUpdate = dogs[index];
     setDogs((prevDogs) =>
       prevDogs.map((dog, i) => (i === index ? { ...dog, isSaving: true } : dog)),
     );
 
     try {
-      const dogToUpdate = dogs[index];
       const payload = {
         bio: dogToUpdate.bio,
-        bio_image_url: uploadedUrl, // Correctly assigning the S3 URL
+        bio_image_url: uploadedUrl,
       };
 
       const updatedDog = await updateDog(dogToUpdate.id, payload);
@@ -83,7 +100,6 @@ const ProfilePage = () => {
       );
     } catch (error) {
       console.error('Error updating dog:', error);
-
       setDogs((prevDogs) =>
         prevDogs.map((dog, i) => (i === index ? { ...dog, isSaving: false } : dog)),
       );
@@ -96,33 +112,18 @@ const ProfilePage = () => {
     );
   };
 
-  const fullName = `${selectedUser.first_name} ${selectedUser.last_name}`;
-  const crumbs = [
-    { text: 'Hospitals', link: '/admin/hospitals' },
-    {
-      text: selectedHospital.name,
-      link: `/admin/hospitals/${selectedHospital.id}`,
-    },
-    { text: fullName },
-  ];
-
-  const getUploadPath = (dogName) => {
-    const hospitalName = selectedHospital.name.replace(/\s+/g, '_');
-    const userFullName = `${selectedUser.first_name}_${selectedUser.last_name}`.replace(
-      /\s+/g,
-      '_',
-    );
-    const fileName = dogName
-      ? `${dogName.replace(/\s+/g, '_')}_${Date.now()}.jpg`
-      : `${Date.now()}.jpg`;
-    return `${hospitalName}/${userFullName}/${fileName}`;
-  };
-
-
+  const crumbs = useMemo(
+    () => [
+      { text: 'Hospitals', link: '/admin/hospitals' },
+      { text: selectedHospital.name, link: `/admin/hospitals/${selectedHospital.id}` },
+      { text: `${selectedUser.first_name} ${selectedUser.last_name}` },
+    ],
+    [selectedHospital, selectedUser],
+  );
 
   return (
     <Box sx={{ padding: 3, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      <Breadcrumb crumbs={crumbs}></Breadcrumb>
+      <Breadcrumb crumbs={crumbs} />
 
       <Container maxWidth="lg" sx={{ marginTop: 4 }}>
         <Paper elevation={3} sx={{ padding: 4, marginBottom: 4, borderRadius: 2 }}>
@@ -130,17 +131,19 @@ const ProfilePage = () => {
             <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
               <ProfilePicture
                 isUploadEnabled={false}
-                objectKey="users/60/29fdc9c7-f974-424c-8548-177c7854b1be_1728329510839.jpg"
+                objectKey={selectedUser.profile_image_url.replace(
+                  process.env.REACT_APP_S3_PROFILE_PICTURE_BUCKET_URL,
+                  '',
+                )}
                 firstName={selectedUser.first_name}
                 lastName={selectedUser.last_name}
                 hospitalName={selectedHospital.name}
-                // eslint-disable-next-line no-undef
                 bucketName={process.env.REACT_APP_S3_PROFILE_PICTURE_BUCKET}
               />
             </Grid>
             <Grid item xs={12} md={8}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
-                {fullName}
+                {selectedUser.first_name} {selectedUser.last_name}
               </Typography>
               <Typography variant="body1" color="textSecondary" sx={{ marginBottom: 1 }}>
                 Phone: {selectedUser.phone}
@@ -164,22 +167,31 @@ const ProfilePage = () => {
           gutterBottom
           sx={{ fontWeight: 'bold', marginBottom: 2, textAlign: 'center' }}
         >
-          Dogs Associated with {fullName}
+          Dogs Associated with {`${selectedUser.first_name} ${selectedUser.last_name}`}
+        </Typography>
+        <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 2, marginBottom: 2 }}>
+          Please upload pictures of the therapy dogs and include a bio. This is what the patient
+          will see when they are requesting visits from the therapy dogs.
         </Typography>
 
-        {loading ? ( // Render spinner when loading
+        {loading ? (
           <Box sx={{ textAlign: 'center', marginTop: 4 }}>
             <CircularProgress />
           </Box>
         ) : (
           <Grid container spacing={3}>
             {dogs.map((dog, index) => {
-              const profilePictureKey = dog.bio_image_url.replace(
-                        // eslint-disable-next-line no-undef
-                        process.env.REACT_APP_S3_PROFILE_BIO_PICTURE_URL,
-                        ''
-                      )
-              const decodeProfilePictureKey = decodeURI(profilePictureKey)
+              const uploadPath = generateUploadPath(selectedHospital.name, userFullName, dog.name);
+              const profilePictureKey = dog?.bio_image_url
+                ? dog.bio_image_url.replace(
+                    // eslint-disable-next-line no-undef
+                    process.env.REACT_APP_S3_PROFILE_BIO_PICTURE_URL || '',
+                    '',
+                  )
+                : '';
+
+              const decodeProfilePictureKey = profilePictureKey ? decodeURI(profilePictureKey) : '';
+
               return (
                 <Grid item xs={12} md={6} key={dog.id || index}>
                   <Card
@@ -206,17 +218,14 @@ const ProfilePage = () => {
                     </IconButton>
 
                     <ProfilePicture
-                      uploadedPath={getUploadPath(dog.name)}
+                      uploadedPath={uploadPath}
                       dogName={dog.name || 'Unnamed Dog'}
                       isDog={true}
                       firstName={selectedUser.first_name}
                       lastName={selectedUser.last_name}
                       objectKey={decodeProfilePictureKey}
-                      // eslint-disable-next-line no-undef
                       bucketName={process.env.REACT_APP_S3_PROFILE_BIO_PICTURE_BUCKET}
-                      onUpload={(url) => {
-                        setUploadedUrl(url);
-                      }}
+                      onUpload={(url) => setUploadedUrl(url)}
                       isUploadEnabled={dog.isEditing}
                     />
 
@@ -228,10 +237,7 @@ const ProfilePage = () => {
                         Breed: {dog.breed?.name || 'Unknown Breed'}
                       </Typography>
                       <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 2 }}>
-                        Date of Birth:{' '}
-                        {dog.birthday
-                          ? `${dog.birthday.split('-')[1]}/${dog.birthday.split('-')[2]}/${dog.birthday.split('-')[0]}`
-                          : 'Unknown'}
+                        Date of Birth: {formatDate(dog.birthday)}
                       </Typography>
                       {dog.isEditing ? (
                         <>

@@ -24,27 +24,27 @@ const ChatUI = ({ drawerWidth }) => {
   const authCtx = useContext(AuthContext);
   const { getUserByVenueId } = useUser();
 
+  // Initialize WebSocket connection
   useEffect(() => {
-    if (!authCtx.currentUser) {
+    if (!authCtx?.currentUser) {
       console.error('User is not authenticated');
       return;
     }
 
-    const ws = new WebSocket('wss://370srz3qol.execute-api.us-east-1.amazonaws.com/dev/');
+    const ws = new WebSocket('wss://370srz3qol.execute-api.us-east-1.amazonaws.com/dev', );
     setSocket(ws);
 
     ws.onopen = () => {
+      console.log('WebSocket connection established');
       setIsConnected(true);
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.action === 'retrieveMessages') {
-        // Assuming the server responds with the retrieved messages
-        setMessages(data.messages || []); // Ensure it sets an array to avoid errors
-      } else if (data.action === 'sendMessage') {
-        // Handle incoming messages
-        setMessages((prevMessages) => [...prevMessages, data]);
+      try {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
       }
     };
 
@@ -53,6 +53,7 @@ const ChatUI = ({ drawerWidth }) => {
     };
 
     ws.onclose = () => {
+      console.warn('WebSocket connection closed');
       setIsConnected(false);
     };
 
@@ -61,17 +62,19 @@ const ChatUI = ({ drawerWidth }) => {
         ws.close();
       }
     };
-  }, [authCtx.currentUser]);
+  }, [authCtx?.currentUser]);
 
+  // Scroll to the latest message
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
+  // Fetch contacts based on venue ID
   useEffect(() => {
-    const fetchData = async () => {
-      if (!authCtx.currentUser) {
+    const fetchContacts = async () => {
+      if (!authCtx?.currentUser) {
         console.error('User is not authenticated');
         return;
       }
@@ -79,39 +82,51 @@ const ChatUI = ({ drawerWidth }) => {
       try {
         const response = await getUserByVenueId(authCtx.currentUser.attributes['custom:venueId']);
         const filteredUsers = response.filter(
-          (u) => u.auth_user_id !== authCtx.currentUser.username,
+          (user) => user.auth_user_id !== authCtx.currentUser.username,
         );
         setContacts(filteredUsers);
       } catch (error) {
-        console.error('Error fetching data', error);
+        console.error('Error fetching contacts:', error);
       }
     };
-    fetchData();
-  }, [authCtx.currentUser, getUserByVenueId]);
+
+    fetchContacts();
+  }, [authCtx?.currentUser, getUserByVenueId]);
+
+  const handleWebSocketMessage = (data) => {
+    switch (data.action) {
+      case 'retrieveMessages':
+        setMessages(data.messages || []);
+        break;
+      case 'sendMessage':
+        setMessages((prevMessages) => [...prevMessages, data]);
+        break;
+      default:
+        console.warn('Unknown WebSocket action:', data.action);
+    }
+  };
 
   const handleContactClick = (contact) => {
-    if (!authCtx.currentUser) {
+    if (!authCtx?.currentUser) {
       console.error('User is not authenticated');
       return;
     }
 
     setSelectedContact(contact);
-    setMessages([]); // Clear the current messages while waiting for the new messages
+    setMessages([]); // Clear current messages while fetching new ones
 
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      const messagePayload = JSON.stringify({
-        body: {
-          action: 'retrieveMessages',
-          senderId: authCtx.currentUser.userId, // Current user's ID
-          recipientId: contact.auth_user_id, // Selected contact's ID
-          startDate: Date.now() - 7 * 24 * 60 * 60 * 1000, // Last 7 days
-          endDate: Date.now(),
-        },
-      });
+    if (socket?.readyState === WebSocket.OPEN) {
+      const messagePayload = {
+        action: 'retrieveMessages',
+        senderId: authCtx.currentUser.userId,
+        recipientId: contact.auth_user_id,
+        startDate: Date.now() - 7 * 24 * 60 * 60 * 1000, // Last 7 days
+        endDate: Date.now(),
+      };
 
       try {
-        socket.send(messagePayload);
-        console.log('Message sent successfully.');
+        socket.send(JSON.stringify({ body: messagePayload }));
+        console.log('Retrieve messages request sent');
       } catch (error) {
         console.error('Error sending retrieveMessages request:', error);
       }
@@ -121,40 +136,39 @@ const ChatUI = ({ drawerWidth }) => {
   };
 
   const handleSendMessage = (newMessage) => {
-    if (!authCtx.currentUser || !selectedContact) {
-      console.error('User or selected contact is not available');
+    if (!authCtx?.currentUser || !selectedContact || !newMessage.content.trim()) {
+      console.error('Invalid message or user/contact not selected');
       return;
     }
 
-    if (socket && socket.readyState === WebSocket.OPEN && newMessage.content.trim() !== '') {
-      const messagePayload = JSON.stringify({
-        body: {
-          action: 'sendMessage',
-          senderId: authCtx.currentUser.userId,
-          recipientId: selectedContact.auth_user_id,
-          messageContent: newMessage.content,
-          timestamp: Date.now(),
-        },
-      });
+    if (socket?.readyState === WebSocket.OPEN) {
+      const messagePayload = {
+        action: 'sendMessage',
+        senderId: authCtx.currentUser.userId,
+        recipientId: selectedContact.auth_user_id,
+        messageContent: newMessage.content,
+        timestamp: Date.now(),
+      };
 
       try {
-        socket.send(messagePayload);
+        socket.send(JSON.stringify({ body: messagePayload }));
+        console.log('Message sent');
       } catch (error) {
         console.error('Error sending message:', error);
       }
+    } else {
+      console.error('WebSocket connection is not open.');
     }
   };
 
   const getInitials = (contact) => {
     if (!contact) return '';
-
-    const firstNameInitial = contact.first_name ? contact.first_name[0].toUpperCase() : '';
-    const lastNameInitial = contact.last_name ? contact.last_name[0].toUpperCase() : '';
-
+    const firstNameInitial = contact.first_name?.[0]?.toUpperCase() || '';
+    const lastNameInitial = contact.last_name?.[0]?.toUpperCase() || '';
     return `${firstNameInitial}${lastNameInitial}`;
   };
 
-  if (!authCtx.currentUser) {
+  if (!authCtx?.currentUser) {
     return (
       <Box
         sx={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' }}
@@ -168,6 +182,7 @@ const ChatUI = ({ drawerWidth }) => {
     <Box
       sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}
     >
+      {/* Contacts List */}
       <Box
         sx={{
           width: drawerWidth,
@@ -178,19 +193,16 @@ const ChatUI = ({ drawerWidth }) => {
         }}
       >
         <List>
-          {contacts.map((contact, index) => (
+          {contacts.map((contact) => (
             <ListItem
-              key={index}
+              key={contact.auth_user_id}
               button
               onClick={() => handleContactClick(contact)}
               sx={{
                 padding: '10px 20px',
                 borderBottom: 1,
                 borderColor: 'divider',
-                transition: 'background-color 0.3s',
-                '&:hover': {
-                  backgroundColor: 'grey.100',
-                },
+                '&:hover': { backgroundColor: 'grey.100' },
               }}
             >
               <Avatar
@@ -209,8 +221,9 @@ const ChatUI = ({ drawerWidth }) => {
         </List>
       </Box>
 
+      {/* Chat Section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, height: '100%' }}>
-        <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 2, bgcolor: 'background.default' }}>
+        <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 2 }}>
           <Messages
             messages={messages}
             sender={authCtx.currentUser.username}
