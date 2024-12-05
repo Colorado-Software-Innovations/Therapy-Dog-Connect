@@ -48,17 +48,19 @@ jobs:
       # Step 6: Build the project
       - name: Build project
         env:
-          CI: false # Prevent treating warnings as errors
+          CI: false
         run: npm run build
 
       # Step 7: Test the project
       #- name: Test project
-       # run: npm test
+      #  run: npm test
 
       # Step 8: Sanitize Branch Name
       - name: Sanitize Branch Name
         id: sanitize
-        run: echo "SANITIZED_BRANCH_NAME=${GITHUB_REF_NAME//[^a-zA-Z0-9_]/-}" >> $GITHUB_ENV
+        run: |
+          echo "SANITIZED_BRANCH_NAME=${GITHUB_REF_NAME//[^a-zA-Z0-9_-]/-}" >> $GITHUB_ENV
+          echo "Sanitized branch name: ${GITHUB_REF_NAME//[^a-zA-Z0-9_-]/-}"
 
       # Step 9: Upload build artifact
       - name: Upload build artifact
