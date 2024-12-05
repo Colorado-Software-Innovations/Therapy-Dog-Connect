@@ -1,4 +1,4 @@
-name: Deploy Therapy Dog Connect to S3
+name: Deploy Therapy Dog Connect
 
 on:
   workflow_run:
@@ -13,12 +13,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Build Artifact
+      # Step 1: Checkout the code (to match the repository state)
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Download the build artifact
+      - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
           name: build-artifact
-          path: ./build
 
+      # Step 3: Deploy to S3 based on branch
       - name: Deploy to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

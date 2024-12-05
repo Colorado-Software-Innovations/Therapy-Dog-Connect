@@ -3,49 +3,57 @@ name: Build Therapy Dog Connect
 on:
   push:
     branches:
-      - '**' # Trigger on pushes to any branch
+      - '**' # Trigger on any push
   pull_request:
     branches:
-      - '**' # Trigger for any PR targeting any branch
+      - '**' # Trigger on PR creation and updates
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '21'
 
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # Step 4: Create Amplify Configuration
+      - name: Create Amplify Configuration
+        env:
+          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
+          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
+          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
+          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
+          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
+        run: node create-amplify-config.js
+
+      # Step 5: Lint the code
       - name: Lint code
         run: npm run lint
 
+      # Step 6: Build the project
       - name: Build project
         env:
           CI: false # Prevent treating warnings as errors
-          GENERATE_SOURCEMAP: true
         run: npm run build
 
+      # Step 7: Test the project
       - name: Test project
         run: npm test
 
-      - name: Upload Build Artifact
+      # Step 8: Upload build artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          path: ./build # Path to the build output
+          path: ./build # Adjust the path to your build output
