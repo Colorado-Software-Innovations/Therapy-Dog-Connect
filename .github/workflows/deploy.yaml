@@ -3,6 +3,8 @@ name: Deploy Therapy Dog Connect to S3
 on:
   push:
     branches:
+      - dev
+      - staging
       - main # Trigger on push to the main branch
   pull_request:
     branches:
@@ -47,6 +49,17 @@ jobs:
           AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
           AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
           AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
-        run: |
-          npm install -g aws-cli
-          aws s3 sync build/ s3://therapydogconnect.com --delete
+         run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            echo "Deploying to Dev environment..."
+            aws s3 sync build/ s3://dev-therapydogconnect --delete
+          elif [ "${{ github.ref_name }}" = "staging" ]; then
+            echo "Deploying to Staging environment..."
+            aws s3 sync build/ s3://staging-therapydogconnect --delete
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            echo "Deploying to Production environment..."
+            aws s3 sync build/ s3://prod-therapydogconnect --delete
+          else
+            echo "Branch not configured for deployment."
+            exit 1
+          fi
