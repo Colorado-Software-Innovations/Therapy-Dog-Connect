@@ -9,7 +9,11 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      ${{ github.event.workflow_run.conclusion == 'success' && 
+      (github.event.workflow_run.head_branch == 'main' || 
+       github.event.workflow_run.head_branch == 'dev' || 
+       github.event.workflow_run.head_branch == 'staging') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -50,11 +54,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          if [ "${{ github.ref_name }}" = "dev" ]; then
+          if [ "${{ github.event.workflow_run.head_branch }}" = "dev" ]; then
             aws s3 sync build/ s3://dev-therapydogconnect --delete
-          elif [ "${{ github.ref_name }}" = "staging" ]; then
+          elif [ "${{ github.event.workflow_run.head_branch }}" = "staging" ]; then
             aws s3 sync build/ s3://staging-therapydogconnect --delete
-          elif [ "${{ github.ref_name }}" = "main" ]; then
+          elif [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
             aws s3 sync build/ s3://prod-therapydogconnect --delete
           else
             echo "Branch not configured for deployment."
