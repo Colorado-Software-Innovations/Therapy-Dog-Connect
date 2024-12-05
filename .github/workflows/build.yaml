@@ -3,10 +3,14 @@ name: Build Therapy Dog Connect
 on:
   push:
     branches:
-      - '**' # Trigger on any push
+      - main
+      - dev
+      - staging
   pull_request:
     branches:
-      - '**' # Trigger on PR creation and updates
+      - main
+      - dev
+      - staging
 
 jobs:
   build:
@@ -55,5 +59,5 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifact
-          path: ./build # Adjust the path to your build output
+          name: build-artifact-${{ github.ref_name }}
+          path: ./build
