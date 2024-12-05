@@ -17,14 +17,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '21'
 
+      # Step 3: Cache node modules
       - name: Cache node modules
         uses: actions/cache@v3
         with:
@@ -33,9 +36,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      # Step 4: Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # Step 5: Create Amplify Config
       - name: Create Amplify Config
         env:
           AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
@@ -45,11 +50,13 @@ jobs:
           AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: node create-amplify-config.js
 
+      # Step 6: Lint the code
       - name: Lint code
         run: npm run lint
 
+      # Step 7: Build the project
       - name: Build project
         env:
-          CI: false # Set CI to false to prevent treating warnings as errors
+          CI: false # Prevent treating warnings as errors
           GENERATE_SOURCEMAP: true
         run: npm run build
