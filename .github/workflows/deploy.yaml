@@ -1,52 +1,45 @@
-name: Deploy Therapy Dog Connect to S3
+name: Deploy Therapy Dog Connect
 
 on:
-  push:
-    branches:
-      - main # Trigger on push to the main branch
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - Build Therapy Dog Connect
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code (to match the repository state)
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      # Step 2: Download the build artifact
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
         with:
-          node-version: '21' # Use the Node.js version compatible with your project
+          name: build-artifact
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Create Amplify Config
-        env:
-          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
-          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
-          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
-          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
-          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
-        run: node create-amplify-config.js
-
-      - name: Build project
-        run: npm run build
-
+      # Step 3: Deploy to S3 based on branch
       - name: Deploy to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
-          AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
-          AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
-          AWS_COGNITO_REGION: ${{ secrets.AWS_COGNITO_REGION }}
-          AWS_USER_POOLS_ID: ${{ secrets.AWS_USER_POOLS_ID }}
-          AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: |
-          npm install -g aws-cli
-          aws s3 sync build/ s3://therapydogconnect.com --delete
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            echo "Deploying to Dev environment..."
+            aws s3 sync build/ s3://dev-therapydogconnect --delete
+          elif [ "${{ github.ref_name }}" = "staging" ]; then
+            echo "Deploying to Staging environment..."
+            aws s3 sync build/ s3://staging-therapydogconnect --delete
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            echo "Deploying to Production environment..."
+            aws s3 sync build/ s3://prod-therapydogconnect --delete
+          else
+            echo "Branch not configured for deployment."
+            exit 1
+          fi

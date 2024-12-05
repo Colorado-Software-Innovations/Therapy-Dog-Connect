@@ -4,35 +4,35 @@ on:
   push:
     branches:
       - main
+      - dev
+      - staging
   pull_request:
     branches:
       - main
+      - dev
+      - staging
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '21'
 
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      - name: Create Amplify Config
+      # Step 4: Create Amplify Configuration
+      - name: Create Amplify Configuration
         env:
           AWS_PROJECT_REGION: ${{ secrets.AWS_PROJECT_REGION }}
           AWS_COGNITO_IDENTITY_POOL_ID: ${{ secrets.AWS_COGNITO_IDENTITY_POOL_ID }}
@@ -41,11 +41,28 @@ jobs:
           AWS_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.AWS_USER_POOLS_WEB_CLIENT_ID }}
         run: node create-amplify-config.js
 
+      # Step 5: Lint the code
       - name: Lint code
         run: npm run lint
 
+      # Step 6: Build the project
       - name: Build project
         env:
-          CI: false # Set CI to false to prevent treating warnings as errors
-          GENERATE_SOURCEMAP: true
+          CI: false # Prevent treating warnings as errors
         run: npm run build
+
+      # Step 7: Test the project
+      #- name: Test project
+       # run: npm test
+
+      # Step 8: Sanitize Branch Name
+      - name: Sanitize Branch Name
+        id: sanitize
+        run: echo "SANITIZED_BRANCH_NAME=${GITHUB_REF_NAME//[^a-zA-Z0-9_]/-}" >> $GITHUB_ENV
+
+      # Step 9: Upload build artifact
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact-${{ env.SANITIZED_BRANCH_NAME }}
+          path: ./build
