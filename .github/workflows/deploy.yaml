@@ -13,18 +13,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Step 1: Extract Branch Name from Workflow Run
+      - name: Extract Branch Name
+        id: extract
+        run: |
+          REF=${{ github.event.workflow_run.head_branch || github.ref_name }}
+          echo "SANITIZED_BRANCH_NAME=${REF//[^a-zA-Z0-9_-]/-}" >> $GITHUB_ENV
 
-      - name: Sanitize Branch Name
-        id: sanitize
-        run: echo "SANITIZED_BRANCH_NAME=${GITHUB_REF_NAME//[^a-zA-Z0-9_-]/-}" >> $GITHUB_ENV
-
+      # Step 2: Download the build artifact
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
           name: build-artifact-${{ env.SANITIZED_BRANCH_NAME }}
 
+      # Step 3: Deploy to S3
       - name: Deploy to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -37,4 +39,7 @@ jobs:
             aws s3 sync build/ s3://staging-therapydogconnect --delete
           elif [ "${{ github.ref_name }}" = "main" ]; then
             aws s3 sync build/ s3://prod-therapydogconnect --delete
+          else
+            echo "Branch not configured for deployment."
+            exit 1
           fi
