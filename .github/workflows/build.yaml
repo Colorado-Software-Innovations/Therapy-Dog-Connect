@@ -5,12 +5,12 @@ on:
     branches:
       - main
       - dev
-      - staging
+      - stage
   pull_request:
     branches:
       - main
       - dev
-      - staging
+      - stage
 
 jobs:
   build:
