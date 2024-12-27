@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import Image from './Image';
-import { confirmSignUp } from 'aws-amplify/auth';
+
 import LoginForm from './Form';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/auth-context';
@@ -55,16 +55,8 @@ function Index() {
     }
   };
 
-  const handleConfirmationCode = async (e, code) => {
-    e.preventDefault();
-    try {
-      const resp = await confirmSignUp({ username: authCtx.signupEmail, confirmationCode: code });
-      if (resp.isSignUpComplete) {
-        return resp;
-      }
-    } catch (err) {
-      return err;
-    }
+  const handleConfirmationCode = async () => {
+    
   };
 
   const handleConfirmComplete = () => {

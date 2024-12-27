@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { Amplify } from 'aws-amplify';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home/index';
 import Locations from './components/Locations';
@@ -17,11 +16,15 @@ import Chat from './components/Portal/Chat';
 import VisitDetails from './components/Portal/Hospital/VisitDetails';
 import Settings from './components/Portal/Settings';
 import RequestVisit from './components/Visits';
-// eslint-disable-next-line
-import config from './amplifyconfiguration.json';
 import SnackbarAlert from './components/UI/SnackBarAlert';
+import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 
-Amplify.configure(config);
+const poolData = {
+  UserPoolId: process.env.AWS_USER_POOLS_ID,
+  ClientId: 'abcdefgh1234567890', //
+};
+
+
 function App() {
   const authCtx = useContext(AuthContext);
   return (

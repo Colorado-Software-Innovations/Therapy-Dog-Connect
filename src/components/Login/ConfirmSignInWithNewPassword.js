@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { Password as PasswordIcon } from '@mui/icons-material';
-import { confirmSignIn } from '@aws-amplify/auth';
 import { AuthContext } from '../../store/auth-context';
 
 function ConfirmSignInWithNewPassword({ user }) {
@@ -32,17 +31,6 @@ function ConfirmSignInWithNewPassword({ user }) {
     }
 
     try {
-      // Sign in the user with their temporary password
-      const authenticatedUser = await confirmSignIn({
-        username: user.email,
-        password: newPassword,
-        challengeResponse: newPassword,
-      });
-
-      authCtx.isLoggedIn = authenticatedUser.isSignedIn;
-      if (authCtx.isLoggedIn) {
-        navigate(`/admin`);
-      }
     } catch (err) {
       setError(err.message || 'Failed to set the new password');
     } finally {

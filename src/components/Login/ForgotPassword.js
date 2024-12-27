@@ -17,7 +17,6 @@ import {
   VisibilityOff,
   CheckCircleOutline as CheckCircleOutlineIcon,
 } from '@mui/icons-material';
-import { resetPassword, confirmResetPassword } from 'aws-amplify/auth';
 import validateEmail from '../../utils/EmailValidation.js';
 
 const ForgotPassword = ({ handleBackToLogin }) => {
@@ -55,8 +54,7 @@ const ForgotPassword = ({ handleBackToLogin }) => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      const output = await resetPassword({ username: state.email });
-      handleResetPasswordNextSteps(output);
+;
     } catch (error) {
       setState((prevSate) => ({
         ...prevSate,
